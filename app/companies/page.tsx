@@ -1,14 +1,16 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useGetCompanies } from '@/hooks/useCompanies';
 import { useAuth } from '@/contexts/AuthContext';
+import CreateCompanyModal from '@/components/CreateCompanyModal';
 
 export default function CompaniesPage() {
   const router = useRouter();
   const { isAuthenticated, logout } = useAuth();
   const { data: companies, isLoading, error } = useGetCompanies();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -56,14 +58,28 @@ export default function CompaniesPage() {
             <h1 className="text-2xl font-bold text-gray-900">My Companies</h1>
             <p className="text-sm text-gray-600 mt-1">Welcome</p>
           </div>
-          <button
-            onClick={logout}
-            className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            Logout
-          </button>
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+            >
+              <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              New Company
+            </button>
+            <button
+              onClick={logout}
+              className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              Logout
+            </button>
+          </div>
         </div>
       </header>
+
+      {/* Create Company Modal */}
+      <CreateCompanyModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
