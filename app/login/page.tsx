@@ -15,8 +15,8 @@ export default function LoginPage() {
       // Save token to localStorage
       localStorage.setItem('auth_token', data.access_token);
 
-      // Redirect to dashboard or home page
-      router.push('/');
+      // Redirect to companies page
+      router.push('/companies');
     },
     onError: (error: any) => {
       setErrorMessage(
