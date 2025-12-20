@@ -9,26 +9,29 @@ export interface InvoiceLine {
 
 export interface Invoice {
   id: string;
-  invoiceNumber: string;
-  issueDate: string;
-  dueDate: string;
-  companyId: string;
-  clientId?: string;
-  clientDetails?: {
+  date: string;
+  series: string;
+  number: number;
+  totalAmount: number;
+  totalVat: number;
+  grandTotal: number;
+  company: {
+    id: string;
     name: string;
     cui: string;
     address?: string;
     county?: string;
     regNumber?: string;
-    iban?: string;
-    bank?: string;
+  };
+  client: {
+    id?: string;
+    name: string;
+    cui: string;
+    address?: string;
+    county?: string;
+    regNumber?: string;
   };
   invoiceLines: InvoiceLine[];
-  subtotal: number;
-  totalVat: number;
-  total: number;
-  status: 'draft' | 'sent' | 'paid' | 'overdue';
-  notes?: string;
 }
 
 export interface CreateInvoiceRequest {
