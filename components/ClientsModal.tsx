@@ -24,7 +24,7 @@ export default function ClientsModal({ isOpen, onClose, company }: ClientsModalP
 
   const handleViewInvoices = () => {
     if (company) {
-      router.push(`/invoices/${company.id}`);
+      router.push(`/invoices?companyId=${company.id}`);
     }
   };
 
