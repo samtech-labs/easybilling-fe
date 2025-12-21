@@ -202,7 +202,7 @@ export default function CreateInvoiceModal({
 
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-      <div className="relative top-10 mx-auto p-6 border w-full max-w-5xl shadow-lg rounded-md bg-white mb-10">
+      <div className="relative top-10 mx-auto p-4 sm:p-6 border w-11/12 max-w-5xl shadow-lg rounded-md bg-white mb-10">
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-2xl font-bold text-gray-900">Create New Invoice</h3>
           <button
@@ -318,7 +318,7 @@ export default function CreateInvoiceModal({
                 </select>
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
                     Client Name <span className="text-red-500">*</span>
@@ -410,7 +410,7 @@ export default function CreateInvoiceModal({
           </div>
 
           {/* Invoice Dates */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label
                 htmlFor="issueDate"
@@ -477,112 +477,126 @@ export default function CreateInvoiceModal({
               {invoiceLines.map((line, index) => (
                 <div
                   key={index}
-                  className="grid grid-cols-12 gap-2 items-end bg-white p-3 rounded border border-gray-200"
+                  className="bg-white p-3 rounded border border-gray-200"
                 >
-                  <div className="col-span-4">
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
-                      Description <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={line.description}
-                      onChange={(e) =>
-                        handleLineChange(index, 'description', e.target.value)
-                      }
-                      className="block w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                      required
-                    />
-                  </div>
-                  <div className="col-span-2">
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
-                      Quantity
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={line.quantity}
-                      onChange={(e) =>
-                        handleLineChange(
-                          index,
-                          'quantity',
-                          parseFloat(e.target.value) || 0
-                        )
-                      }
-                      className="block w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                    />
-                  </div>
-                  <div className="col-span-2">
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
-                      Unit Price
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={line.unitPrice}
-                      onChange={(e) =>
-                        handleLineChange(
-                          index,
-                          'unitPrice',
-                          parseFloat(e.target.value) || 0
-                        )
-                      }
-                      className="block w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                    />
-                  </div>
-                  <div className="col-span-1">
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
-                      VAT %
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      max="100"
-                      value={line.vat}
-                      onChange={(e) =>
-                        handleLineChange(
-                          index,
-                          'vat',
-                          parseFloat(e.target.value) || 0
-                        )
-                      }
-                      className="block w-full px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                    />
-                  </div>
-                  <div className="col-span-2">
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
-                      Total
-                    </label>
-                    <input
-                      type="text"
-                      value={line.totalPrice.toFixed(2)}
-                      readOnly
-                      className="block w-full px-2 py-1 text-sm border border-gray-300 rounded-md bg-gray-50"
-                    />
-                  </div>
-                  <div className="col-span-1 flex items-end">
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveLine(index)}
-                      disabled={invoiceLines.length === 1}
-                      className="w-full px-2 py-1 text-sm text-red-600 hover:text-red-900 disabled:text-gray-400 disabled:cursor-not-allowed"
-                      title="Remove line"
-                    >
-                      <svg
-                        className="w-5 h-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                  {/* Mobile: Stack all fields vertically */}
+                  <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-2 sm:items-end">
+                    <div className="sm:col-span-4">
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
+                        Description <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={line.description}
+                        onChange={(e) =>
+                          handleLineChange(index, 'description', e.target.value)
+                        }
+                        className="block w-full px-2 py-2 text-sm border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                        required
+                      />
+                    </div>
+
+                    {/* Mobile: 2-column grid for quantity and unit price */}
+                    <div className="grid grid-cols-2 gap-2 sm:contents">
+                      <div className="sm:col-span-2">
+                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                          Quantity
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={line.quantity}
+                          onChange={(e) =>
+                            handleLineChange(
+                              index,
+                              'quantity',
+                              parseFloat(e.target.value) || 0
+                            )
+                          }
+                          className="block w-full px-2 py-2 text-sm border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                         />
-                      </svg>
-                    </button>
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                          Unit Price
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={line.unitPrice}
+                          onChange={(e) =>
+                            handleLineChange(
+                              index,
+                              'unitPrice',
+                              parseFloat(e.target.value) || 0
+                            )
+                          }
+                          className="block w-full px-2 py-2 text-sm border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Mobile: 2-column grid for VAT and total */}
+                    <div className="grid grid-cols-2 gap-2 sm:contents">
+                      <div className="sm:col-span-1">
+                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                          VAT %
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={line.vat}
+                          onChange={(e) =>
+                            handleLineChange(
+                              index,
+                              'vat',
+                              parseFloat(e.target.value) || 0
+                            )
+                          }
+                          className="block w-full px-2 py-2 text-sm border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                        />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                          Total
+                        </label>
+                        <input
+                          type="text"
+                          value={line.totalPrice.toFixed(2)}
+                          readOnly
+                          className="block w-full px-2 py-2 text-sm border border-gray-300 rounded-md bg-gray-50"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Remove button - full width on mobile */}
+                    <div className="sm:col-span-1 sm:flex sm:items-end">
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveLine(index)}
+                        disabled={invoiceLines.length === 1}
+                        className="w-full sm:w-auto px-3 py-2 text-sm font-medium text-red-600 hover:text-red-900 disabled:text-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-1"
+                        title="Remove line"
+                      >
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                          />
+                        </svg>
+                        <span className="sm:hidden">Remove</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
