@@ -1,0 +1,16 @@
+{
+  "navigationFallback": {
+    "rewrite": "/404.html"
+  },
+  "routes": [
+    {
+      "route": "/_next/*",
+      "headers": {
+        "cache-control": "public, max-age=31536000, immutable"
+      }
+    }
+  ],
+  "mimeTypes": {
+    ".json": "application/json"
+  }
+}

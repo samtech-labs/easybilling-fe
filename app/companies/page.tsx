@@ -2,15 +2,48 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useGetCompanies } from '@/hooks/useCompanies';
+import { useGetCompanies, useDeleteCompany } from '@/hooks/useCompanies';
 import { useAuth } from '@/contexts/AuthContext';
 import CreateCompanyModal from '@/components/CreateCompanyModal';
+import CreateInvoiceModal from '@/components/CreateInvoiceModal';
+import ClientsModal from '@/components/ClientsModal';
+import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
+import { Company } from '@/types/company';
 
 export default function CompaniesPage() {
   const router = useRouter();
   const { isAuthenticated, logout } = useAuth();
   const { data: companies, isLoading, error } = useGetCompanies();
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const deleteCompanyMutation = useDeleteCompany();
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
+  const [isClientsModalOpen, setIsClientsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
+  const [companyToDelete, setCompanyToDelete] = useState<Company | null>(null);
+
+  const handleCompanyClick = (company: Company) => {
+    setSelectedCompany(company);
+    setIsClientsModalOpen(true);
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent, company: Company) => {
+    e.stopPropagation(); // Prevent row click event
+    setCompanyToDelete(company);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!companyToDelete) return;
+
+    try {
+      await deleteCompanyMutation.mutateAsync(companyToDelete.id);
+      setIsDeleteModalOpen(false);
+      setCompanyToDelete(null);
+    } catch (error) {
+      console.error('Failed to delete company:', error);
+    }
+  };
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -60,7 +93,16 @@ export default function CompaniesPage() {
           </div>
           <div className="flex items-center space-x-3">
             <button
-              onClick={() => setIsModalOpen(true)}
+              onClick={() => setIsInvoiceModalOpen(true)}
+              className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              New Invoice
+            </button>
+            <button
+              onClick={() => setIsCreateModalOpen(true)}
               className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
             >
               <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -78,8 +120,31 @@ export default function CompaniesPage() {
         </div>
       </header>
 
+      {/* Create Invoice Modal */}
+      <CreateInvoiceModal
+        isOpen={isInvoiceModalOpen}
+        onClose={() => setIsInvoiceModalOpen(false)}
+      />
+
       {/* Create Company Modal */}
-      <CreateCompanyModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <CreateCompanyModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} />
+
+      {/* Clients Modal */}
+      <ClientsModal
+        isOpen={isClientsModalOpen}
+        onClose={() => setIsClientsModalOpen(false)}
+        company={selectedCompany}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Company"
+        message={`Are you sure you want to delete "${companyToDelete?.name}"? This action cannot be undone.`}
+        isDeleting={deleteCompanyMutation.isPending}
+      />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -88,7 +153,7 @@ export default function CompaniesPage() {
             <p className="text-gray-600">No companies found. Create your first company!</p>
           </div>
         ) : (
-          <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+          <div className="bg-white shadow overflow-x-auto sm:rounded-lg">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
@@ -124,41 +189,54 @@ export default function CompaniesPage() {
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    Bank
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    IBAN
+                    Actions
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {companies?.map((company) => (
-                  <tr key={company.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  <tr
+                    key={company.id}
+                    onClick={() => handleCompanyClick(company)}
+                    className="hover:bg-indigo-50 cursor-pointer transition-colors"
+                  >
+                    <td className="px-6 py-4 text-sm font-medium text-gray-900">
                       {company.name}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {company.cui}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 text-sm text-gray-500">
                       {company.address || '-'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 text-sm text-gray-500">
                       {company.county || '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {company.regNumber || '-'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {company.bank || '-'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {company.iban || '-'}
+                    <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                      <button
+                        onClick={(e) => handleDeleteClick(e, company)}
+                        className="text-red-600 hover:text-red-900 transition-colors"
+                        title="Delete company"
+                      >
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                          />
+                        </svg>
+                      </button>
                     </td>
                   </tr>
                 ))}

@@ -57,3 +57,16 @@ export const useGetAnafCompanyDetails = () => {
     },
   });
 };
+
+export const useDeleteCompany = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (companyId: string): Promise<void> => {
+      await apiClient.delete(`/company/DeleteCompany?companyId=${companyId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['companies'] });
+    },
+  });
+};
