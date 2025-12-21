@@ -2,7 +2,7 @@ import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 
 // Create axios instance
 const apiClient: AxiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'https://localhost:7064/api',
+  baseURL: "https://easybilling-api-h6ezemhzhyf4apbx.westeurope-01.azurewebsites.net/api",
   headers: {
     'Content-Type': 'application/json',
   },
