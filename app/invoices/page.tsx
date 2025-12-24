@@ -6,6 +6,9 @@ import { useGetInvoices, useGenerateInvoicePdf } from '@/hooks/useInvoices';
 import { useGetCompanies } from '@/hooks/useCompanies';
 import { useAuth } from '@/contexts/AuthContext';
 import { Invoice } from '@/types/invoice';
+import { useToast } from '@/hooks/useToast';
+import ToastContainer from '@/components/ToastContainer';
+import AnafIntegration from '@/components/AnafIntegration';
 
 export default function InvoicesPage() {
   const router = useRouter();
@@ -16,6 +19,7 @@ export default function InvoicesPage() {
   const { data: invoices, isLoading, error } = useGetInvoices(companyId);
   const generatePdfMutation = useGenerateInvoicePdf();
   const [downloadingInvoiceId, setDownloadingInvoiceId] = useState<string | null>(null);
+  const { toasts, showToast, removeToast } = useToast();
 
   const company = companies?.find((c) => c.id === companyId);
 
@@ -104,6 +108,7 @@ export default function InvoicesPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <ToastContainer toasts={toasts} onClose={removeToast} />
       {/* Header */}
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -139,6 +144,24 @@ export default function InvoicesPage() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* ANAF Integration Section */}
+        <div className="mb-6 bg-white shadow rounded-lg p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex-1">
+              <h2 className="text-lg font-semibold text-gray-900">E-Factura Integration</h2>
+              <p className="mt-1 text-sm text-gray-600">
+                Connect your digital certificate to enable electronic invoicing with ANAF.
+              </p>
+            </div>
+            <div className="flex-shrink-0">
+              <AnafIntegration
+                onSuccess={(message) => showToast(message, 'success')}
+                onError={(message) => showToast(message, 'error')}
+              />
+            </div>
+          </div>
+        </div>
+
         {sortedInvoices.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-lg shadow">
             <svg
