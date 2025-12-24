@@ -19,6 +19,11 @@ export default function InvoicesPage() {
 
   const company = companies?.find((c) => c.id === companyId);
 
+  const handleLogout = () => {
+    logout();
+    router.push('/login');
+  };
+
   const handleDownloadPdf = async (invoice: Invoice) => {
     setDownloadingInvoiceId(invoice.id);
     try {
@@ -128,7 +133,7 @@ export default function InvoicesPage() {
               )}
             </div>
             <button
-              onClick={logout}
+              onClick={handleLogout}
               className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 min-h-[44px]"
             >
               Logout

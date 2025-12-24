@@ -22,6 +22,11 @@ export default function CompaniesPage() {
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [companyToDelete, setCompanyToDelete] = useState<Company | null>(null);
 
+  const handleLogout = () => {
+    logout();
+    router.push('/login');
+  };
+
   const handleCompanyClick = (company: Company) => {
     setSelectedCompany(company);
     setIsClientsModalOpen(true);
@@ -112,7 +117,7 @@ export default function CompaniesPage() {
                 <span className="hidden sm:inline">New Company</span>
               </button>
               <button
-                onClick={logout}
+                onClick={handleLogout}
                 className="inline-flex items-center justify-center px-3 sm:px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 flex-1 sm:flex-initial min-h-[44px]"
               >
                 <span>Logout</span>

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { AuthContextType } from '@/types/auth';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -20,6 +20,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setIsLoading(false);
   }, []);
 
+  const setAuthToken = (newToken: string) => {
+    localStorage.setItem('auth_token', newToken);
+    setToken(newToken);
+  };
+
   const logout = () => {
     localStorage.removeItem('auth_token');
     setToken(null);
@@ -28,14 +33,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const value: AuthContextType = {
     user: null,
     token,
-    login: async () => {}, // This will be overridden by the mutation
+    login: async () => {}, // This will be handled by useLogin hook
     logout,
-    isAuthenticated: !!token,
+    isAuthenticated: !!token && !isLoading,
+    setAuthToken,
   };
-
-  if (isLoading) {
-    return null; // or a loading spinner
-  }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
