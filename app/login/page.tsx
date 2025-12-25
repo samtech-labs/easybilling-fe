@@ -1,19 +1,21 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLogin } from '@/hooks/useLogin';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function LoginPage() {
   const router = useRouter();
+  const { isAuthenticated, setAuthToken } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
   const loginMutation = useLogin({
     onSuccess: async (data) => {
-      // Save token to localStorage
-      localStorage.setItem('auth_token', data.access_token);
+      // Update auth context with the new token
+      setAuthToken(data.access_token);
 
       // Redirect to companies page
       router.push('/companies');
@@ -24,6 +26,13 @@ export default function LoginPage() {
       );
     },
   });
+
+  // Redirect to companies if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.replace('/companies');
+    }
+  }, [isAuthenticated, router]);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
