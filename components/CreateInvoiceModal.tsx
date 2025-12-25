@@ -1,20 +1,24 @@
 'use client';
 
 import { useState, FormEvent, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useCreateInvoice } from '@/hooks/useInvoices';
 import { useGetCompanies } from '@/hooks/useCompanies';
 import { useGetClients } from '@/hooks/useClients';
-import { CreateInvoiceRequest, InvoiceLine } from '@/types/invoice';
+import { CreateInvoiceRequest, InvoiceLine, Invoice } from '@/types/invoice';
 
 interface CreateInvoiceModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onInvoiceCreated?: (invoice: Invoice) => void;
 }
 
 export default function CreateInvoiceModal({
   isOpen,
   onClose,
+  onInvoiceCreated,
 }: CreateInvoiceModalProps) {
+  const router = useRouter();
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>('');
   const [useExistingClient, setUseExistingClient] = useState<boolean>(true);
   const [selectedClientId, setSelectedClientId] = useState<string>('');
@@ -88,12 +92,12 @@ export default function CreateInvoiceModal({
   };
 
   const calculateSubtotal = (): number => {
-    return invoiceLines.reduce((sum, line) => sum + line.totalPrice, 0);
+    return invoiceLines.reduce((sum, line) => sum + (line.totalPrice || line.lineTotal || 0), 0);
   };
 
   const calculateTotalVat = (): number => {
     return invoiceLines.reduce(
-      (sum, line) => sum + (line.totalPrice * line.vat) / 100,
+      (sum, line) => sum + ((line.totalPrice || line.lineTotal || 0) * (line.vat || line.vatRate || 0)) / 100,
       0
     );
   };
@@ -151,13 +155,21 @@ export default function CreateInvoiceModal({
     }
 
     try {
-      await createInvoiceMutation.mutateAsync(requestData);
+      const createdInvoice = await createInvoiceMutation.mutateAsync(requestData);
       setSuccessMessage('Invoice created successfully!');
 
-      // Reset form and close modal after a brief delay
+      // Reset form and redirect after a brief delay
       setTimeout(() => {
         resetForm();
         onClose();
+
+        // If callback is provided, use it (for custom behavior)
+        if (onInvoiceCreated) {
+          onInvoiceCreated(createdInvoice);
+        } else {
+          // Default behavior: redirect to invoices page with the new invoice
+          router.push(`/invoices?companyId=${selectedCompanyId}&invoiceId=${createdInvoice.id}`);
+        }
       }, 1500);
     } catch (error: any) {
       setErrorMessage(
@@ -565,7 +577,7 @@ export default function CreateInvoiceModal({
                         </label>
                         <input
                           type="text"
-                          value={line.totalPrice.toFixed(2)}
+                          value={(line.totalPrice || line.lineTotal || 0).toFixed(2)}
                           readOnly
                           className="block w-full px-2 py-2 text-sm border border-gray-300 rounded-md bg-gray-50"
                         />

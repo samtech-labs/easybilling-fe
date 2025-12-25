@@ -9,17 +9,23 @@ import { Invoice } from '@/types/invoice';
 import { useToast } from '@/hooks/useToast';
 import ToastContainer from '@/components/ToastContainer';
 import AnafIntegration from '@/components/AnafIntegration';
+import InvoiceDetailsModal from '@/components/InvoiceDetailsModal';
+import CreateInvoiceModal from '@/components/CreateInvoiceModal';
 
 export default function InvoicesPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const companyId = searchParams.get('companyId') || '';
+  const invoiceId = searchParams.get('invoiceId');
   const { isAuthenticated, logout } = useAuth();
   const { data: companies } = useGetCompanies();
   const { data: invoices, isLoading, error } = useGetInvoices(companyId);
   const generatePdfMutation = useGenerateInvoicePdf();
   const [downloadingInvoiceId, setDownloadingInvoiceId] = useState<string | null>(null);
   const { toasts, showToast, removeToast } = useToast();
+  const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
+  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+  const [isCreateInvoiceModalOpen, setIsCreateInvoiceModalOpen] = useState(false);
 
   const company = companies?.find((c) => c.id === companyId);
 
@@ -28,7 +34,13 @@ export default function InvoicesPage() {
     router.push('/login');
   };
 
-  const handleDownloadPdf = async (invoice: Invoice) => {
+  const handleInvoiceClick = (invoice: Invoice) => {
+    setSelectedInvoice(invoice);
+    setIsInvoiceModalOpen(true);
+  };
+
+  const handleDownloadPdf = async (e: React.MouseEvent, invoice: Invoice) => {
+    e.stopPropagation(); // Prevent row click event
     setDownloadingInvoiceId(invoice.id);
     try {
       const pdfBlob = await generatePdfMutation.mutateAsync(invoice.id);
@@ -70,6 +82,20 @@ export default function InvoicesPage() {
       router.push('/companies');
     }
   }, [companyId, router]);
+
+  // Auto-open invoice modal when invoiceId is in URL
+  useEffect(() => {
+    if (invoiceId && invoices && !isLoading) {
+      const invoice = invoices.find((inv) => inv.id === invoiceId);
+      if (invoice) {
+        setSelectedInvoice(invoice);
+        setIsInvoiceModalOpen(true);
+        // Remove invoiceId from URL after opening modal
+        const newUrl = `/invoices?companyId=${companyId}`;
+        router.replace(newUrl, { scroll: false });
+      }
+    }
+  }, [invoiceId, invoices, isLoading, companyId, router]);
 
   if (!isAuthenticated) {
     return null;
@@ -118,16 +144,7 @@ export default function InvoicesPage() {
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-            <div className="flex-1 w-full sm:w-auto">
-              <button
-                onClick={() => router.push('/companies')}
-                className="inline-flex items-center text-sm text-indigo-600 hover:text-indigo-800 mb-2 min-h-[44px]"
-              >
-                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-                Back to Companies
-              </button>
+            <div>
               <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Invoices</h1>
               {company && (
                 <p className="text-sm text-gray-600 mt-1">
@@ -138,10 +155,13 @@ export default function InvoicesPage() {
               )}
             </div>
             <button
-              onClick={handleLogout}
-              className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 min-h-[44px]"
+              onClick={() => setIsCreateInvoiceModalOpen(true)}
+              className="inline-flex items-center justify-center px-3 sm:px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 w-full sm:w-auto min-h-[44px]"
             >
-              Logout
+              <svg className="w-5 h-5 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span className="hidden sm:inline">New Invoice</span>
             </button>
           </div>
         </div>
@@ -245,7 +265,8 @@ export default function InvoicesPage() {
                   {sortedInvoices.map((invoice) => (
                     <tr
                       key={invoice.id}
-                      className="hover:bg-gray-50 transition-colors"
+                      onClick={() => handleInvoiceClick(invoice)}
+                      className="hover:bg-indigo-50 cursor-pointer transition-colors"
                     >
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         {invoice.series} {invoice.number}
@@ -268,7 +289,7 @@ export default function InvoicesPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                         <button
-                          onClick={() => handleDownloadPdf(invoice)}
+                          onClick={(e) => handleDownloadPdf(e, invoice)}
                           disabled={downloadingInvoiceId === invoice.id}
                           className="inline-flex items-center px-3 py-1 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                           title="Download PDF"
@@ -328,7 +349,8 @@ export default function InvoicesPage() {
               {sortedInvoices.map((invoice) => (
                 <div
                   key={invoice.id}
-                  className="bg-white shadow rounded-lg p-4 hover:shadow-md transition-all"
+                  onClick={() => handleInvoiceClick(invoice)}
+                  className="bg-white shadow rounded-lg p-4 cursor-pointer hover:shadow-md active:bg-indigo-50 transition-all"
                 >
                   <div className="flex justify-between items-start mb-3">
                     <div className="flex-1">
@@ -360,7 +382,7 @@ export default function InvoicesPage() {
                   </div>
 
                   <button
-                    onClick={() => handleDownloadPdf(invoice)}
+                    onClick={(e) => handleDownloadPdf(e, invoice)}
                     disabled={downloadingInvoiceId === invoice.id}
                     className="w-full inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[44px]"
                   >
@@ -455,6 +477,19 @@ export default function InvoicesPage() {
           </div>
         )}
       </main>
+
+      {/* Invoice Details Modal */}
+      <InvoiceDetailsModal
+        isOpen={isInvoiceModalOpen}
+        onClose={() => setIsInvoiceModalOpen(false)}
+        invoice={selectedInvoice}
+      />
+
+      {/* Create Invoice Modal */}
+      <CreateInvoiceModal
+        isOpen={isCreateInvoiceModalOpen}
+        onClose={() => setIsCreateInvoiceModalOpen(false)}
+      />
     </div>
   );
 }

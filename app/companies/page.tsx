@@ -95,7 +95,7 @@ export default function CompaniesPage() {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div>
               <h1 className="text-xl sm:text-2xl font-bold text-gray-900">My Companies</h1>
-              <p className="text-sm text-gray-600 mt-1">Welcome</p>
+              <p className="text-sm text-gray-600 mt-1">Manage your companies and clients</p>
             </div>
             <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
               <button
@@ -115,12 +115,6 @@ export default function CompaniesPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
                 <span className="hidden sm:inline">New Company</span>
-              </button>
-              <button
-                onClick={handleLogout}
-                className="inline-flex items-center justify-center px-3 sm:px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 flex-1 sm:flex-initial min-h-[44px]"
-              >
-                <span>Logout</span>
               </button>
             </div>
           </div>
