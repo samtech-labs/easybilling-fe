@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '@/lib/api-client';
-import { Invoice, CreateInvoiceRequest, LastInvoiceNumber } from '@/types/invoice';
+import { Invoice, CreateInvoiceRequest, LastInvoiceNumber, AnafSubmissionStatusDto } from '@/types/invoice';
 
 export const useGetInvoices = (companyId: string) => {
   return useQuery({
@@ -86,10 +86,51 @@ export const useGenerateInvoicePdf = () => {
 };
 
 export const useSendEfactura = () => {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async (invoiceId: string): Promise<any> => {
       const response = await apiClient.get(
         `/invoice/SendEFactura?invoiceId=${invoiceId}`
+      );
+      return response.data;
+    },
+    onSuccess: (_, invoiceId) => {
+      // Invalidate the status query to refetch the new status
+      queryClient.invalidateQueries({ queryKey: ['anafSubmissionStatus', invoiceId] });
+    },
+  });
+};
+
+export const useGetAnafSubmissionStatus = (invoiceId: string | null) => {
+  return useQuery({
+    queryKey: ['anafSubmissionStatus', invoiceId],
+    queryFn: async (): Promise<AnafSubmissionStatusDto> => {
+      const response = await apiClient.get<AnafSubmissionStatusDto>(
+        `/invoice/GetAnafSubmissionStatus?invoiceId=${invoiceId}`
+      );
+      return response.data;
+    },
+    enabled: !!invoiceId,
+    refetchInterval: (query) => {
+      const data = query.state.data as AnafSubmissionStatusDto | undefined;
+      // Auto-refetch every 5 seconds if status is Pending or Processing
+      if (data && (data.status === 0 || data.status === 1)) {
+        return 5000;
+      }
+      return false;
+    },
+  });
+};
+
+export const useDownloadAnafResponse = () => {
+  return useMutation({
+    mutationFn: async (invoiceId: string): Promise<Blob> => {
+      const response = await apiClient.get(
+        `/invoice/DownloadAnafResponse?invoiceId=${invoiceId}`,
+        {
+          responseType: 'blob',
+        }
       );
       return response.data;
     },

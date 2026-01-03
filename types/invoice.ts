@@ -63,3 +63,19 @@ export interface CreateInvoiceRequest {
   invoiceLines: InvoiceLine[];
   notes?: string;
 }
+
+export enum AnafSubmissionStatus {
+  Pending = 0,
+  Processing = 1,
+  Ok = 2,
+  Error = 3,
+}
+
+export interface AnafSubmissionStatusDto {
+  id?: string;
+  status: AnafSubmissionStatus;
+  errorMessage?: string;
+  uploadedAt?: string;
+  lastCheckedAt?: string;
+  downloadId?: string;
+}

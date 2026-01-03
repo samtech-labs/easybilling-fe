@@ -1,7 +1,7 @@
 'use client';
 
-import { Invoice } from '@/types/invoice';
-import { useGenerateInvoicePdf, useSendEfactura } from '@/hooks/useInvoices';
+import { Invoice, AnafSubmissionStatus } from '@/types/invoice';
+import { useGenerateInvoicePdf, useSendEfactura, useGetAnafSubmissionStatus, useDownloadAnafResponse } from '@/hooks/useInvoices';
 import { useState } from 'react';
 
 interface InvoiceDetailsModalProps {
@@ -13,8 +13,11 @@ interface InvoiceDetailsModalProps {
 export default function InvoiceDetailsModal({ isOpen, onClose, invoice }: InvoiceDetailsModalProps) {
   const generatePdfMutation = useGenerateInvoicePdf();
   const sendEfacturaMutation = useSendEfactura();
+  const downloadAnafResponseMutation = useDownloadAnafResponse();
+  const { data: anafStatus } = useGetAnafSubmissionStatus(invoice?.id || null);
   const [isDownloading, setIsDownloading] = useState(false);
-  const [isSendingEfactura, setIsSendingEfactura] = useState(false);
+  const [isDownloadingAnafResponse, setIsDownloadingAnafResponse] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
 
   const handleDownloadPdf = async () => {
     if (!invoice) return;
@@ -43,18 +46,124 @@ export default function InvoiceDetailsModal({ isOpen, onClose, invoice }: Invoic
   const handleSendEfactura = async () => {
     if (!invoice) return;
 
-    setIsSendingEfactura(true);
     try {
-      const result = await sendEfacturaMutation.mutateAsync(invoice.id);
-      alert('EFactura sent successfully to ANAF!');
+      await sendEfacturaMutation.mutateAsync(invoice.id);
     } catch (error: any) {
       console.error('Failed to send EFactura:', error);
-      const errorMessage = error.response?.data?.message || 'Failed to send EFactura. Please try again.';
-      alert(errorMessage);
-    } finally {
-      setIsSendingEfactura(false);
     }
   };
+
+  const handleDownloadAnafResponse = async () => {
+    if (!invoice) return;
+
+    setIsDownloadingAnafResponse(true);
+    try {
+      const blob = await downloadAnafResponseMutation.mutateAsync(invoice.id);
+
+      // Create a download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `ANAF_Response_${invoice.series}_${invoice.number}.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error: any) {
+      console.error('Failed to download ANAF response:', error);
+      alert('Failed to download ANAF response. Please try again.');
+    } finally {
+      setIsDownloadingAnafResponse(false);
+    }
+  };
+
+  const getSubmissionButtonContent = () => {
+    if (!anafStatus || !anafStatus.id) {
+      // No submission yet - show Send button
+      return {
+        disabled: false,
+        onClick: handleSendEfactura,
+        className: 'bg-green-600 hover:bg-green-700',
+        content: (
+          <>
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+            </svg>
+            Send EFactura
+          </>
+        ),
+      };
+    }
+
+    switch (anafStatus.status) {
+      case AnafSubmissionStatus.Pending:
+      case AnafSubmissionStatus.Processing:
+        // Show loading state
+        return {
+          disabled: true,
+          onClick: () => {},
+          className: 'bg-yellow-600 cursor-not-allowed',
+          content: (
+            <>
+              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              {anafStatus.status === AnafSubmissionStatus.Pending ? 'Pending...' : 'Processing...'}
+            </>
+          ),
+        };
+
+      case AnafSubmissionStatus.Ok:
+        // Show success state
+        return {
+          disabled: true,
+          onClick: () => {},
+          className: 'bg-green-600 cursor-not-allowed',
+          content: (
+            <>
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              EFactura Sent Successfully
+            </>
+          ),
+        };
+
+      case AnafSubmissionStatus.Error:
+        // Show error state with retry option and error button
+        return {
+          disabled: false,
+          onClick: handleSendEfactura,
+          className: 'bg-red-600 hover:bg-red-700',
+          content: (
+            <>
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Retry Send
+            </>
+          ),
+        };
+
+      default:
+        return {
+          disabled: false,
+          onClick: handleSendEfactura,
+          className: 'bg-green-600 hover:bg-green-700',
+          content: (
+            <>
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+              </svg>
+              Send EFactura
+            </>
+          ),
+        };
+    }
+  };
+
+  const submissionButton = getSubmissionButtonContent();
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -219,53 +328,47 @@ export default function InvoiceDetailsModal({ isOpen, onClose, invoice }: Invoic
 
         {/* Actions */}
         <div className="flex flex-col sm:flex-row justify-end gap-2">
+          {anafStatus?.status === AnafSubmissionStatus.Error && anafStatus.errorMessage && (
+            <button
+              onClick={() => setShowErrorModal(true)}
+              className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 rounded-md transition-colors min-h-[44px]"
+            >
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              View Error
+            </button>
+          )}
+          {anafStatus?.status === AnafSubmissionStatus.Ok && anafStatus.downloadId && (
+            <button
+              onClick={handleDownloadAnafResponse}
+              disabled={isDownloadingAnafResponse}
+              className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[44px]"
+            >
+              {isDownloadingAnafResponse ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Downloading...
+                </>
+              ) : (
+                <>
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Download ANAF Response
+                </>
+              )}
+            </button>
+          )}
           <button
-            onClick={handleSendEfactura}
-            disabled={isSendingEfactura}
-            className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[44px]"
+            onClick={submissionButton.onClick}
+            disabled={submissionButton.disabled}
+            className={`w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white ${submissionButton.className} rounded-md disabled:opacity-50 transition-colors min-h-[44px]`}
           >
-            {isSendingEfactura ? (
-              <>
-                <svg
-                  className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-                Sending...
-              </>
-            ) : (
-              <>
-                <svg
-                  className="w-5 h-5 mr-2"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-                  />
-                </svg>
-                Send EFactura
-              </>
-            )}
+            {submissionButton.content}
           </button>
           <button
             onClick={handleDownloadPdf}
@@ -323,6 +426,35 @@ export default function InvoiceDetailsModal({ isOpen, onClose, invoice }: Invoic
           </button>
         </div>
       </div>
+
+      {/* Error Modal */}
+      {showErrorModal && anafStatus?.errorMessage && (
+        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-10">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <div className="flex items-start mb-4">
+              <div className="flex-shrink-0">
+                <svg className="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="ml-3 flex-1">
+                <h3 className="text-lg font-medium text-gray-900">ANAF Submission Error</h3>
+                <div className="mt-2">
+                  <p className="text-sm text-gray-700 whitespace-pre-wrap break-words">{anafStatus.errorMessage}</p>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <button
+                onClick={() => setShowErrorModal(false)}
+                className="px-4 py-2 text-sm font-medium text-white bg-gray-600 hover:bg-gray-700 rounded-md transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
