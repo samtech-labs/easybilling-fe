@@ -1,7 +1,7 @@
 'use client';
 
 import { Invoice } from '@/types/invoice';
-import { useGenerateInvoicePdf } from '@/hooks/useInvoices';
+import { useGenerateInvoicePdf, useSendEfactura } from '@/hooks/useInvoices';
 import { useState } from 'react';
 
 interface InvoiceDetailsModalProps {
@@ -12,7 +12,9 @@ interface InvoiceDetailsModalProps {
 
 export default function InvoiceDetailsModal({ isOpen, onClose, invoice }: InvoiceDetailsModalProps) {
   const generatePdfMutation = useGenerateInvoicePdf();
+  const sendEfacturaMutation = useSendEfactura();
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isSendingEfactura, setIsSendingEfactura] = useState(false);
 
   const handleDownloadPdf = async () => {
     if (!invoice) return;
@@ -35,6 +37,22 @@ export default function InvoiceDetailsModal({ isOpen, onClose, invoice }: Invoic
       alert('Failed to generate PDF. Please try again.');
     } finally {
       setIsDownloading(false);
+    }
+  };
+
+  const handleSendEfactura = async () => {
+    if (!invoice) return;
+
+    setIsSendingEfactura(true);
+    try {
+      const result = await sendEfacturaMutation.mutateAsync(invoice.id);
+      alert('EFactura sent successfully to ANAF!');
+    } catch (error: any) {
+      console.error('Failed to send EFactura:', error);
+      const errorMessage = error.response?.data?.message || 'Failed to send EFactura. Please try again.';
+      alert(errorMessage);
+    } finally {
+      setIsSendingEfactura(false);
     }
   };
 
@@ -201,6 +219,54 @@ export default function InvoiceDetailsModal({ isOpen, onClose, invoice }: Invoic
 
         {/* Actions */}
         <div className="flex flex-col sm:flex-row justify-end gap-2">
+          <button
+            onClick={handleSendEfactura}
+            disabled={isSendingEfactura}
+            className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[44px]"
+          >
+            {isSendingEfactura ? (
+              <>
+                <svg
+                  className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                Sending...
+              </>
+            ) : (
+              <>
+                <svg
+                  className="w-5 h-5 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                  />
+                </svg>
+                Send EFactura
+              </>
+            )}
+          </button>
           <button
             onClick={handleDownloadPdf}
             disabled={isDownloading}

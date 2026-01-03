@@ -4,6 +4,8 @@ export interface Client {
   name: string;
   address?: string;
   county?: string;
+  city?: string;
+  country?: string;
   cui: string;
   regNumber?: string;
   iban?: string;

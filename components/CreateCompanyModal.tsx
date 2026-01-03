@@ -18,9 +18,13 @@ export default function CreateCompanyModal({ isOpen, onClose }: CreateCompanyMod
     cui: '',
     address: '',
     county: '',
+    city: '',
+    country: '',
     regNumber: '',
     iban: '',
     bank: '',
+    isVatPayer: false,
+    isEFacturaActive: false,
   });
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
@@ -29,8 +33,11 @@ export default function CreateCompanyModal({ isOpen, onClose }: CreateCompanyMod
   const getAnafDetailsMutation = useGetAnafCompanyDetails();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
   };
 
   const handleFetchAnafData = async () => {
@@ -51,7 +58,11 @@ export default function CreateCompanyModal({ isOpen, onClose }: CreateCompanyMod
         name: anafData.name || prev.name,
         address: anafData.address || prev.address,
         county: anafData.county || prev.county,
+        city: anafData.city || prev.city,
+        country: anafData.country || prev.country,
         regNumber: anafData.regNumber || prev.regNumber,
+        isVatPayer: anafData.isVatPayer,
+        isEFacturaActive: anafData.isEFacturaActive,
       }));
 
       setSuccessMessage('Company data fetched successfully from ANAF');
@@ -83,9 +94,13 @@ export default function CreateCompanyModal({ isOpen, onClose }: CreateCompanyMod
           cui: '',
           address: '',
           county: '',
+          city: '',
+          country: '',
           regNumber: '',
           iban: '',
           bank: '',
+          isVatPayer: false,
+          isEFacturaActive: false,
         });
         setSuccessMessage('');
         onClose();
@@ -213,6 +228,21 @@ export default function CreateCompanyModal({ isOpen, onClose }: CreateCompanyMod
             />
           </div>
 
+          {/* City */}
+          <div>
+            <label htmlFor="city" className="block text-sm font-medium text-gray-700">
+              City
+            </label>
+            <input
+              type="text"
+              name="city"
+              id="city"
+              value={formData.city}
+              onChange={handleInputChange}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            />
+          </div>
+
           {/* Registration Number */}
           <div>
             <label htmlFor="regNumber" className="block text-sm font-medium text-gray-700">
@@ -256,6 +286,39 @@ export default function CreateCompanyModal({ isOpen, onClose }: CreateCompanyMod
               onChange={handleInputChange}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
             />
+          </div>
+
+          {/* Checkboxes Section */}
+          <div className="space-y-3 pt-2">
+            {/* VAT Payer */}
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                name="isVatPayer"
+                id="isVatPayer"
+                checked={formData.isVatPayer}
+                onChange={handleInputChange}
+                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+              />
+              <label htmlFor="isVatPayer" className="ml-2 block text-sm text-gray-700">
+                VAT Payer
+              </label>
+            </div>
+
+            {/* E-Factura Active */}
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                name="isEFacturaActive"
+                id="isEFacturaActive"
+                checked={formData.isEFacturaActive}
+                onChange={handleInputChange}
+                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+              />
+              <label htmlFor="isEFacturaActive" className="ml-2 block text-sm text-gray-700">
+                E-Factura Active
+              </label>
+            </div>
           </div>
 
           {/* Form Actions */}

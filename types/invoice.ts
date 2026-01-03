@@ -14,6 +14,7 @@ export interface InvoiceLine {
 export interface Invoice {
   id: string;
   date: string;
+  dueDate?: string;
   series: string;
   number: number;
   totalAmount: number;
@@ -38,6 +39,11 @@ export interface Invoice {
   invoiceLines: InvoiceLine[];
 }
 
+export interface LastInvoiceNumber {
+  series: string;
+  number: number;
+}
+
 export interface CreateInvoiceRequest {
   companyId: string;
   clientId?: string;
@@ -50,6 +56,8 @@ export interface CreateInvoiceRequest {
     iban?: string;
     bank?: string;
   };
+  series: string;
+  number: number;
   issueDate: string;
   dueDate: string;
   invoiceLines: InvoiceLine[];
