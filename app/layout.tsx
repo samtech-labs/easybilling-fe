@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/Providers";
 import Navbar from "@/components/Navbar";
+import I18nProvider from "@/components/I18nProvider";
+import { getMessages } from 'next-intl/server';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,20 +24,24 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const messages = await getMessages();
+
   return (
-    <html lang="en">
+    <html lang="ro">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Providers>
-          <Navbar />
-          {children}
-        </Providers>
+        <I18nProvider initialMessages={messages}>
+          <Providers>
+            <Navbar />
+            {children}
+          </Providers>
+        </I18nProvider>
       </body>
     </html>
   );

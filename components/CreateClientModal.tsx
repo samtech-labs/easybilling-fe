@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, FormEvent } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   useCreateClient,
   useGetAnafClientDetails,
@@ -18,6 +19,9 @@ export default function CreateClientModal({
   onClose,
   companyId,
 }: CreateClientModalProps) {
+  const tClient = useTranslations('client');
+  const tCompany = useTranslations('company');
+  const tCommon = useTranslations('common');
   const [formData, setFormData] = useState<CreateClientRequest>({
     name: '',
     cui: '',
@@ -42,7 +46,7 @@ export default function CreateClientModal({
 
   const handleFetchAnafData = async () => {
     if (!formData.cui.trim()) {
-      setErrorMessage('Please enter a CUI before fetching ANAF data');
+      setErrorMessage(tClient('cuiRequired'));
       return;
     }
 
@@ -63,10 +67,10 @@ export default function CreateClientModal({
         regNumber: anafData.regNumber || prev.regNumber,
       }));
 
-      setSuccessMessage('Client data fetched successfully from ANAF');
+      setSuccessMessage(tClient('fetchedFromAnafSuccess'));
     } catch (error: any) {
       setErrorMessage(
-        error.response?.data?.message || 'Failed to fetch client data from ANAF'
+        error.response?.data?.message || tClient('fetchedFromAnafError')
       );
     }
   };
@@ -77,13 +81,13 @@ export default function CreateClientModal({
     setSuccessMessage('');
 
     if (!formData.name.trim() || !formData.cui.trim()) {
-      setErrorMessage('Name and CUI are required');
+      setErrorMessage(tClient('nameAndCuiRequired'));
       return;
     }
 
     try {
       await createClientMutation.mutateAsync(formData);
-      setSuccessMessage('Client created successfully!');
+      setSuccessMessage(tClient('clientCreatedSuccess'));
 
       // Reset form and close modal after a brief delay
       setTimeout(() => {
@@ -103,7 +107,7 @@ export default function CreateClientModal({
       }, 1500);
     } catch (error: any) {
       setErrorMessage(
-        error.response?.data?.message || 'Failed to create client. Please try again.'
+        error.response?.data?.message || tClient('clientCreatedError')
       );
     }
   };
@@ -114,7 +118,7 @@ export default function CreateClientModal({
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-[60]">
       <div className="relative top-20 mx-auto p-4 sm:p-5 border w-11/12 max-w-2xl shadow-lg rounded-md bg-white">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-xl font-bold text-gray-900">Create New Client</h3>
+          <h3 className="text-xl font-bold text-gray-900">{tClient('createClient')}</h3>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 text-2xl font-bold"
@@ -139,7 +143,7 @@ export default function CreateClientModal({
           {/* CUI with ANAF fetch button */}
           <div>
             <label htmlFor="cui" className="block text-sm font-medium text-gray-700">
-              CUI <span className="text-red-500">*</span>
+              {tCompany('cui')} <span className="text-red-500">*</span>
             </label>
             <div className="mt-1 flex rounded-md shadow-sm">
               <input
@@ -150,7 +154,7 @@ export default function CreateClientModal({
                 value={formData.cui}
                 onChange={handleInputChange}
                 className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-l-md border border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                placeholder="Enter CUI"
+                placeholder={tClient('enterCui')}
               />
               <button
                 type="button"
@@ -164,14 +168,14 @@ export default function CreateClientModal({
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    Fetching...
+                    {tCompany('fetching')}
                   </span>
                 ) : (
                   <span className="flex items-center">
                     <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
                     </svg>
-                    Fetch from ANAF
+                    {tCompany('fetchFromAnaf')}
                   </span>
                 )}
               </button>
@@ -181,7 +185,7 @@ export default function CreateClientModal({
           {/* Name */}
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-              Client Name <span className="text-red-500">*</span>
+              {tClient('clientName')} <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -191,13 +195,14 @@ export default function CreateClientModal({
               value={formData.name}
               onChange={handleInputChange}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              placeholder={tClient('enterClientName')}
             />
           </div>
 
           {/* Address */}
           <div>
             <label htmlFor="address" className="block text-sm font-medium text-gray-700">
-              Address
+              {tCompany('address')}
             </label>
             <input
               type="text"
@@ -206,13 +211,14 @@ export default function CreateClientModal({
               value={formData.address}
               onChange={handleInputChange}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              placeholder={tClient('enterAddress')}
             />
           </div>
 
           {/* County */}
           <div>
             <label htmlFor="county" className="block text-sm font-medium text-gray-700">
-              County
+              {tCompany('county')}
             </label>
             <input
               type="text"
@@ -221,13 +227,14 @@ export default function CreateClientModal({
               value={formData.county}
               onChange={handleInputChange}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              placeholder={tClient('enterCounty')}
             />
           </div>
 
           {/* City */}
           <div>
             <label htmlFor="city" className="block text-sm font-medium text-gray-700">
-              City
+              {tCompany('city')}
             </label>
             <input
               type="text"
@@ -236,13 +243,14 @@ export default function CreateClientModal({
               value={formData.city}
               onChange={handleInputChange}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              placeholder={tClient('enterCity')}
             />
           </div>
 
           {/* Country */}
           <div>
             <label htmlFor="country" className="block text-sm font-medium text-gray-700">
-              Country
+              {tCompany('country')}
             </label>
             <input
               type="text"
@@ -251,13 +259,14 @@ export default function CreateClientModal({
               value={formData.country}
               onChange={handleInputChange}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              placeholder={tClient('enterCountry')}
             />
           </div>
 
           {/* Registration Number */}
           <div>
             <label htmlFor="regNumber" className="block text-sm font-medium text-gray-700">
-              Registration Number
+              {tCompany('regNumber')}
             </label>
             <input
               type="text"
@@ -266,13 +275,14 @@ export default function CreateClientModal({
               value={formData.regNumber}
               onChange={handleInputChange}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              placeholder={tClient('enterRegNumber')}
             />
           </div>
 
           {/* IBAN */}
           <div>
             <label htmlFor="iban" className="block text-sm font-medium text-gray-700">
-              IBAN
+              {tCompany('iban')}
             </label>
             <input
               type="text"
@@ -281,13 +291,14 @@ export default function CreateClientModal({
               value={formData.iban}
               onChange={handleInputChange}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              placeholder={tClient('enterIban')}
             />
           </div>
 
           {/* Bank */}
           <div>
             <label htmlFor="bank" className="block text-sm font-medium text-gray-700">
-              Bank
+              {tCompany('bank')}
             </label>
             <input
               type="text"
@@ -296,6 +307,7 @@ export default function CreateClientModal({
               value={formData.bank}
               onChange={handleInputChange}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              placeholder={tClient('enterBank')}
             />
           </div>
 
@@ -306,14 +318,14 @@ export default function CreateClientModal({
               onClick={onClose}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
-              Cancel
+              {tCommon('cancel')}
             </button>
             <button
               type="submit"
               disabled={createClientMutation.isPending}
               className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {createClientMutation.isPending ? 'Creating...' : 'Create Client'}
+              {createClientMutation.isPending ? tCommon('loading') + '...' : tClient('createClient')}
             </button>
           </div>
         </form>

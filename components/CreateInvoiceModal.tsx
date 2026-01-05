@@ -2,6 +2,7 @@
 
 import { useState, FormEvent, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useCreateInvoice, useGetLastInvoiceNumber } from '@/hooks/useInvoices';
 import { useGetCompanies } from '@/hooks/useCompanies';
 import { useGetClients } from '@/hooks/useClients';
@@ -19,6 +20,10 @@ export default function CreateInvoiceModal({
   onInvoiceCreated,
 }: CreateInvoiceModalProps) {
   const router = useRouter();
+  const tInvoice = useTranslations('invoice');
+  const tClient = useTranslations('client');
+  const tCompany = useTranslations('company');
+  const tCommon = useTranslations('common');
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>('');
   const [useExistingClient, setUseExistingClient] = useState<boolean>(true);
   const [selectedClientId, setSelectedClientId] = useState<string>('');
@@ -114,12 +119,12 @@ export default function CreateInvoiceModal({
     setSuccessMessage('');
 
     if (!selectedCompanyId) {
-      setErrorMessage('Please select a company');
+      setErrorMessage(tInvoice('selectCompanyRequired'));
       return;
     }
 
     if (useExistingClient && !selectedClientId) {
-      setErrorMessage('Please select a client');
+      setErrorMessage(tInvoice('selectClientRequired'));
       return;
     }
 
@@ -127,12 +132,12 @@ export default function CreateInvoiceModal({
       !useExistingClient &&
       (!customClientDetails.name || !customClientDetails.cui)
     ) {
-      setErrorMessage('Client name and CUI are required');
+      setErrorMessage(tInvoice('clientNameCuiRequired'));
       return;
     }
 
     if (invoiceLines.length === 0 || !invoiceLines[0].description) {
-      setErrorMessage('Please add at least one invoice line');
+      setErrorMessage(tInvoice('addAtLeastOneLine'));
       return;
     }
 
@@ -159,7 +164,7 @@ export default function CreateInvoiceModal({
 
     try {
       const createdInvoice = await createInvoiceMutation.mutateAsync(requestData);
-      setSuccessMessage('Invoice created successfully!');
+      setSuccessMessage(tInvoice('invoiceCreatedSuccess'));
 
       // Reset form and redirect after a brief delay
       setTimeout(() => {
@@ -177,7 +182,7 @@ export default function CreateInvoiceModal({
     } catch (error: any) {
       setErrorMessage(
         error.response?.data?.message ||
-          'Failed to create invoice. Please try again.'
+          tInvoice('invoiceCreatedError')
       );
     }
   };
@@ -227,7 +232,7 @@ export default function CreateInvoiceModal({
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
       <div className="relative top-10 mx-auto p-4 sm:p-6 border w-11/12 max-w-5xl shadow-lg rounded-md bg-white mb-10">
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-2xl font-bold text-gray-900">Create New Invoice</h3>
+          <h3 className="text-2xl font-bold text-gray-900">{tInvoice('createInvoice')}</h3>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 text-2xl font-bold"
@@ -252,14 +257,14 @@ export default function CreateInvoiceModal({
           {/* Company Selection Section */}
           <div className="bg-gray-50 p-4 rounded-lg">
             <h4 className="text-lg font-semibold text-gray-900 mb-3">
-              Issuing Company
+              {tInvoice('issuingCompany')}
             </h4>
             <div>
               <label
                 htmlFor="company"
                 className="block text-sm font-medium text-gray-700"
               >
-                Select Company <span className="text-red-500">*</span>
+                {tCompany('selectCompany')} <span className="text-red-500">*</span>
               </label>
               <select
                 id="company"
@@ -268,7 +273,7 @@ export default function CreateInvoiceModal({
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                 required
               >
-                <option value="">Select a company...</option>
+                <option value="">{tCompany('selectCompany')}</option>
                 {companies?.map((company) => (
                   <option key={company.id} value={company.id}>
                     {company.name} - {company.cui}
@@ -285,7 +290,7 @@ export default function CreateInvoiceModal({
                 htmlFor="series"
                 className="block text-sm font-medium text-gray-700"
               >
-                Series <span className="text-red-500">*</span>
+                {tInvoice('series')} <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -301,7 +306,7 @@ export default function CreateInvoiceModal({
                 htmlFor="number"
                 className="block text-sm font-medium text-gray-700"
               >
-                Number <span className="text-red-500">*</span>
+                {tInvoice('number')} <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
@@ -318,7 +323,7 @@ export default function CreateInvoiceModal({
           {/* Client Selection Section */}
           <div className="bg-gray-50 p-4 rounded-lg">
             <h4 className="text-lg font-semibold text-gray-900 mb-3">
-              Client Details
+              {tClient('clientDetails')}
             </h4>
 
             {/* Toggle between existing and custom client */}
@@ -332,7 +337,7 @@ export default function CreateInvoiceModal({
                     className="form-radio h-4 w-4 text-indigo-600"
                   />
                   <span className="ml-2 text-sm text-gray-700">
-                    Existing Client
+                    {tClient('existingClient')}
                   </span>
                 </label>
                 <label className="inline-flex items-center">
@@ -343,7 +348,7 @@ export default function CreateInvoiceModal({
                     className="form-radio h-4 w-4 text-indigo-600"
                   />
                   <span className="ml-2 text-sm text-gray-700">
-                    Custom Client Details
+                    {tClient('customClientDetails')}
                   </span>
                 </label>
               </div>
@@ -355,7 +360,7 @@ export default function CreateInvoiceModal({
                   htmlFor="client"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  Select Client <span className="text-red-500">*</span>
+                  {tClient('selectClient')} <span className="text-red-500">*</span>
                 </label>
                 <select
                   id="client"
@@ -367,8 +372,8 @@ export default function CreateInvoiceModal({
                 >
                   <option value="">
                     {selectedCompanyId
-                      ? 'Select a client...'
-                      : 'Select a company first'}
+                      ? tClient('selectClient')
+                      : tClient('selectCompanyFirst')}
                   </option>
                   {clients?.map((client) => (
                     <option key={client.id} value={client.id}>
@@ -381,7 +386,7 @@ export default function CreateInvoiceModal({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    Client Name <span className="text-red-500">*</span>
+                    {tClient('clientName')} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -394,7 +399,7 @@ export default function CreateInvoiceModal({
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    CUI <span className="text-red-500">*</span>
+                    {tCompany('cui')} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -407,7 +412,7 @@ export default function CreateInvoiceModal({
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    Address
+                    {tCompany('address')}
                   </label>
                   <input
                     type="text"
@@ -419,7 +424,7 @@ export default function CreateInvoiceModal({
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    County
+                    {tCompany('county')}
                   </label>
                   <input
                     type="text"
@@ -431,7 +436,7 @@ export default function CreateInvoiceModal({
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    Reg Number
+                    {tCompany('regNumber')}
                   </label>
                   <input
                     type="text"
@@ -443,7 +448,7 @@ export default function CreateInvoiceModal({
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    IBAN
+                    {tCompany('iban')}
                   </label>
                   <input
                     type="text"
@@ -455,7 +460,7 @@ export default function CreateInvoiceModal({
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    Bank
+                    {tCompany('bank')}
                   </label>
                   <input
                     type="text"
@@ -476,7 +481,7 @@ export default function CreateInvoiceModal({
                 htmlFor="issueDate"
                 className="block text-sm font-medium text-gray-700"
               >
-                Issue Date <span className="text-red-500">*</span>
+                {tInvoice('issueDate')} <span className="text-red-500">*</span>
               </label>
               <input
                 type="date"
@@ -492,7 +497,7 @@ export default function CreateInvoiceModal({
                 htmlFor="dueDate"
                 className="block text-sm font-medium text-gray-700"
               >
-                Due Date <span className="text-red-500">*</span>
+                {tInvoice('dueDate')} <span className="text-red-500">*</span>
               </label>
               <input
                 type="date"
@@ -509,7 +514,7 @@ export default function CreateInvoiceModal({
           <div className="bg-gray-50 p-4 rounded-lg">
             <div className="flex justify-between items-center mb-3">
               <h4 className="text-lg font-semibold text-gray-900">
-                Invoice Lines
+                {tInvoice('invoiceLines')}
               </h4>
               <button
                 type="button"
@@ -529,7 +534,7 @@ export default function CreateInvoiceModal({
                     d="M12 4v16m8-8H4"
                   />
                 </svg>
-                Add Line
+                {tInvoice('addLine')}
               </button>
             </div>
 
@@ -543,7 +548,7 @@ export default function CreateInvoiceModal({
                   <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-2 sm:items-end">
                     <div className="sm:col-span-4">
                       <label className="block text-xs font-medium text-gray-700 mb-1">
-                        Description <span className="text-red-500">*</span>
+                        {tInvoice('description')} <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
@@ -560,7 +565,7 @@ export default function CreateInvoiceModal({
                     <div className="grid grid-cols-2 gap-2 sm:contents">
                       <div className="sm:col-span-2">
                         <label className="block text-xs font-medium text-gray-700 mb-1">
-                          Quantity
+                          {tInvoice('quantity')}
                         </label>
                         <input
                           type="number"
@@ -579,7 +584,7 @@ export default function CreateInvoiceModal({
                       </div>
                       <div className="sm:col-span-2">
                         <label className="block text-xs font-medium text-gray-700 mb-1">
-                          Unit Price
+                          {tInvoice('unitPrice')}
                         </label>
                         <input
                           type="number"
@@ -602,7 +607,7 @@ export default function CreateInvoiceModal({
                     <div className="grid grid-cols-2 gap-2 sm:contents">
                       <div className="sm:col-span-1">
                         <label className="block text-xs font-medium text-gray-700 mb-1">
-                          VAT %
+                          {tInvoice('vat')} %
                         </label>
                         <input
                           type="number"
@@ -621,7 +626,7 @@ export default function CreateInvoiceModal({
                       </div>
                       <div className="sm:col-span-2">
                         <label className="block text-xs font-medium text-gray-700 mb-1">
-                          Total
+                          {tInvoice('total')}
                         </label>
                         <input
                           type="text"
@@ -639,7 +644,7 @@ export default function CreateInvoiceModal({
                         onClick={() => handleRemoveLine(index)}
                         disabled={invoiceLines.length === 1}
                         className="w-full sm:w-auto px-3 py-2 text-sm font-medium text-red-600 hover:text-red-900 disabled:text-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-1"
-                        title="Remove line"
+                        title={tInvoice('removeLine')}
                       >
                         <svg
                           className="w-5 h-5"
@@ -654,7 +659,7 @@ export default function CreateInvoiceModal({
                             d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                           />
                         </svg>
-                        <span className="sm:hidden">Remove</span>
+                        <span className="sm:hidden">{tInvoice('remove')}</span>
                       </button>
                     </div>
                   </div>
@@ -667,19 +672,19 @@ export default function CreateInvoiceModal({
               <div className="flex justify-end space-y-2">
                 <div className="w-64">
                   <div className="flex justify-between text-sm">
-                    <span className="font-medium text-gray-700">Subtotal:</span>
+                    <span className="font-medium text-gray-700">{tInvoice('subtotal')}:</span>
                     <span className="text-gray-900">
                       {calculateSubtotal().toFixed(2)} RON
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="font-medium text-gray-700">Total VAT:</span>
+                    <span className="font-medium text-gray-700">{tInvoice('totalVat')}:</span>
                     <span className="text-gray-900">
                       {calculateTotalVat().toFixed(2)} RON
                     </span>
                   </div>
                   <div className="flex justify-between text-lg font-bold pt-2 border-t mt-2">
-                    <span className="text-gray-900">Total:</span>
+                    <span className="text-gray-900">{tInvoice('total')}:</span>
                     <span className="text-indigo-600">
                       {calculateTotal().toFixed(2)} RON
                     </span>
@@ -696,7 +701,7 @@ export default function CreateInvoiceModal({
               onClick={onClose}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
-              Cancel
+              {tCommon('cancel')}
             </button>
             <button
               type="submit"
@@ -704,8 +709,8 @@ export default function CreateInvoiceModal({
               className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {createInvoiceMutation.isPending
-                ? 'Creating...'
-                : 'Create Invoice'}
+                ? tInvoice('creating')
+                : tInvoice('createInvoiceButton')}
             </button>
           </div>
         </form>

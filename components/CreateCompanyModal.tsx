@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, FormEvent } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   useCreateCompany,
   useGetAnafCompanyDetails,
@@ -13,6 +14,8 @@ interface CreateCompanyModalProps {
 }
 
 export default function CreateCompanyModal({ isOpen, onClose }: CreateCompanyModalProps) {
+  const tCompany = useTranslations('company');
+  const tCommon = useTranslations('common');
   const [formData, setFormData] = useState<CreateCompanyRequest>({
     name: '',
     cui: '',
@@ -42,7 +45,7 @@ export default function CreateCompanyModal({ isOpen, onClose }: CreateCompanyMod
 
   const handleFetchAnafData = async () => {
     if (!formData.cui.trim()) {
-      setErrorMessage('Please enter a CUI before fetching ANAF data');
+      setErrorMessage(tCompany('cuiRequired'));
       return;
     }
 
@@ -65,10 +68,10 @@ export default function CreateCompanyModal({ isOpen, onClose }: CreateCompanyMod
         isEFacturaActive: anafData.isEFacturaActive,
       }));
 
-      setSuccessMessage('Company data fetched successfully from ANAF');
+      setSuccessMessage(tCompany('fetchedFromAnafSuccess'));
     } catch (error: any) {
       setErrorMessage(
-        error.response?.data?.message || 'Failed to fetch company data from ANAF'
+        error.response?.data?.message || tCompany('fetchedFromAnafError')
       );
     }
   };
@@ -79,13 +82,13 @@ export default function CreateCompanyModal({ isOpen, onClose }: CreateCompanyMod
     setSuccessMessage('');
 
     if (!formData.name.trim() || !formData.cui.trim()) {
-      setErrorMessage('Name and CUI are required');
+      setErrorMessage(tCompany('nameAndCuiRequired'));
       return;
     }
 
     try {
       await createCompanyMutation.mutateAsync(formData);
-      setSuccessMessage('Company created successfully!');
+      setSuccessMessage(tCompany('companyCreatedSuccess'));
 
       // Reset form and close modal after a brief delay
       setTimeout(() => {
@@ -107,7 +110,7 @@ export default function CreateCompanyModal({ isOpen, onClose }: CreateCompanyMod
       }, 1500);
     } catch (error: any) {
       setErrorMessage(
-        error.response?.data?.message || 'Failed to create company. Please try again.'
+        error.response?.data?.message || tCompany('companyCreatedError')
       );
     }
   };
@@ -118,7 +121,7 @@ export default function CreateCompanyModal({ isOpen, onClose }: CreateCompanyMod
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
       <div className="relative top-20 mx-auto p-4 sm:p-5 border w-11/12 max-w-2xl shadow-lg rounded-md bg-white">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-xl font-bold text-gray-900">Create New Company</h3>
+          <h3 className="text-xl font-bold text-gray-900">{tCompany('createCompany')}</h3>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 text-2xl font-bold"
@@ -143,7 +146,7 @@ export default function CreateCompanyModal({ isOpen, onClose }: CreateCompanyMod
           {/* CUI with ANAF fetch button */}
           <div>
             <label htmlFor="cui" className="block text-sm font-medium text-gray-700">
-              CUI <span className="text-red-500">*</span>
+              {tCompany('cui')} <span className="text-red-500">*</span>
             </label>
             <div className="mt-1 flex rounded-md shadow-sm">
               <input
@@ -154,7 +157,7 @@ export default function CreateCompanyModal({ isOpen, onClose }: CreateCompanyMod
                 value={formData.cui}
                 onChange={handleInputChange}
                 className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-l-md border border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                placeholder="Enter CUI"
+                placeholder={tCompany('enterCui')}
               />
               <button
                 type="button"
@@ -168,14 +171,14 @@ export default function CreateCompanyModal({ isOpen, onClose }: CreateCompanyMod
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    Fetching...
+                    {tCompany('fetching')}
                   </span>
                 ) : (
                   <span className="flex items-center">
                     <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
                     </svg>
-                    Fetch from ANAF
+                    {tCompany('fetchFromAnaf')}
                   </span>
                 )}
               </button>
@@ -185,7 +188,7 @@ export default function CreateCompanyModal({ isOpen, onClose }: CreateCompanyMod
           {/* Name */}
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-              Company Name <span className="text-red-500">*</span>
+              {tCompany('companyName')} <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -195,13 +198,14 @@ export default function CreateCompanyModal({ isOpen, onClose }: CreateCompanyMod
               value={formData.name}
               onChange={handleInputChange}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              placeholder={tCompany('enterCompanyName')}
             />
           </div>
 
           {/* Address */}
           <div>
             <label htmlFor="address" className="block text-sm font-medium text-gray-700">
-              Address
+              {tCompany('address')}
             </label>
             <input
               type="text"
@@ -210,13 +214,14 @@ export default function CreateCompanyModal({ isOpen, onClose }: CreateCompanyMod
               value={formData.address}
               onChange={handleInputChange}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              placeholder={tCompany('enterAddress')}
             />
           </div>
 
           {/* County */}
           <div>
             <label htmlFor="county" className="block text-sm font-medium text-gray-700">
-              County
+              {tCompany('county')}
             </label>
             <input
               type="text"
@@ -225,13 +230,14 @@ export default function CreateCompanyModal({ isOpen, onClose }: CreateCompanyMod
               value={formData.county}
               onChange={handleInputChange}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              placeholder={tCompany('enterCounty')}
             />
           </div>
 
           {/* City */}
           <div>
             <label htmlFor="city" className="block text-sm font-medium text-gray-700">
-              City
+              {tCompany('city')}
             </label>
             <input
               type="text"
@@ -240,13 +246,14 @@ export default function CreateCompanyModal({ isOpen, onClose }: CreateCompanyMod
               value={formData.city}
               onChange={handleInputChange}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              placeholder={tCompany('enterCity')}
             />
           </div>
 
           {/* Registration Number */}
           <div>
             <label htmlFor="regNumber" className="block text-sm font-medium text-gray-700">
-              Registration Number
+              {tCompany('regNumber')}
             </label>
             <input
               type="text"
@@ -255,13 +262,14 @@ export default function CreateCompanyModal({ isOpen, onClose }: CreateCompanyMod
               value={formData.regNumber}
               onChange={handleInputChange}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              placeholder={tCompany('enterRegNumber')}
             />
           </div>
 
           {/* IBAN */}
           <div>
             <label htmlFor="iban" className="block text-sm font-medium text-gray-700">
-              IBAN
+              {tCompany('iban')}
             </label>
             <input
               type="text"
@@ -270,13 +278,14 @@ export default function CreateCompanyModal({ isOpen, onClose }: CreateCompanyMod
               value={formData.iban}
               onChange={handleInputChange}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              placeholder={tCompany('enterIban')}
             />
           </div>
 
           {/* Bank */}
           <div>
             <label htmlFor="bank" className="block text-sm font-medium text-gray-700">
-              Bank
+              {tCompany('bank')}
             </label>
             <input
               type="text"
@@ -285,6 +294,7 @@ export default function CreateCompanyModal({ isOpen, onClose }: CreateCompanyMod
               value={formData.bank}
               onChange={handleInputChange}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              placeholder={tCompany('enterBank')}
             />
           </div>
 
@@ -301,7 +311,7 @@ export default function CreateCompanyModal({ isOpen, onClose }: CreateCompanyMod
                 className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
               />
               <label htmlFor="isVatPayer" className="ml-2 block text-sm text-gray-700">
-                VAT Payer
+                {tCompany('isVatPayer')}
               </label>
             </div>
 
@@ -316,7 +326,7 @@ export default function CreateCompanyModal({ isOpen, onClose }: CreateCompanyMod
                 className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
               />
               <label htmlFor="isEFacturaActive" className="ml-2 block text-sm text-gray-700">
-                E-Factura Active
+                {tCompany('isEFacturaActive')}
               </label>
             </div>
           </div>
@@ -328,14 +338,14 @@ export default function CreateCompanyModal({ isOpen, onClose }: CreateCompanyMod
               onClick={onClose}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
-              Cancel
+              {tCommon('cancel')}
             </button>
             <button
               type="submit"
               disabled={createCompanyMutation.isPending}
               className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {createCompanyMutation.isPending ? 'Creating...' : 'Create Company'}
+              {createCompanyMutation.isPending ? tCommon('loading') + '...' : tCompany('createCompany')}
             </button>
           </div>
         </form>

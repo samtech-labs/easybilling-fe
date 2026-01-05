@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+
 interface DeleteConfirmationModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -17,6 +19,9 @@ export default function DeleteConfirmationModal({
   message,
   isDeleting = false,
 }: DeleteConfirmationModalProps) {
+  const tCommon = useTranslations('common');
+  const tDelete = useTranslations('deleteConfirmation');
+
   if (!isOpen) return null;
 
   return (
@@ -46,14 +51,14 @@ export default function DeleteConfirmationModal({
               disabled={isDeleting}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
             >
-              Cancel
+              {tCommon('cancel')}
             </button>
             <button
               onClick={onConfirm}
               disabled={isDeleting}
               className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isDeleting ? 'Deleting...' : 'Delete'}
+              {isDeleting ? tDelete('deleting') : tCommon('delete')}
             </button>
           </div>
         </div>
