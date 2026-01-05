@@ -2,7 +2,7 @@ import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 
 // Create axios instance
 const apiClient: AxiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "https://10.211.55.5:7064/api",
+  baseURL: process.env.NEXT_PUBLIC_API_URL || "https://localhost:5001/api",
   headers: {
     'Content-Type': 'application/json',
   },

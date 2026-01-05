@@ -1,20 +1,24 @@
 'use client';
 
 import { useState, FormEvent, useEffect } from 'react';
-import { useCreateInvoice } from '@/hooks/useInvoices';
+import { useRouter } from 'next/navigation';
+import { useCreateInvoice, useGetLastInvoiceNumber } from '@/hooks/useInvoices';
 import { useGetCompanies } from '@/hooks/useCompanies';
 import { useGetClients } from '@/hooks/useClients';
-import { CreateInvoiceRequest, InvoiceLine } from '@/types/invoice';
+import { CreateInvoiceRequest, InvoiceLine, Invoice } from '@/types/invoice';
 
 interface CreateInvoiceModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onInvoiceCreated?: (invoice: Invoice) => void;
 }
 
 export default function CreateInvoiceModal({
   isOpen,
   onClose,
+  onInvoiceCreated,
 }: CreateInvoiceModalProps) {
+  const router = useRouter();
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>('');
   const [useExistingClient, setUseExistingClient] = useState<boolean>(true);
   const [selectedClientId, setSelectedClientId] = useState<string>('');
@@ -27,13 +31,14 @@ export default function CreateInvoiceModal({
     iban: '',
     bank: '',
   });
+  const [series, setSeries] = useState<string>('A');
+  const [number, setNumber] = useState<number>(1);
   const [issueDate, setIssueDate] = useState<string>(
     new Date().toISOString().split('T')[0]
   );
   const [dueDate, setDueDate] = useState<string>(
     new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
   );
-  const [notes, setNotes] = useState<string>('');
   const [invoiceLines, setInvoiceLines] = useState<InvoiceLine[]>([
     { description: '', quantity: 1, unitPrice: 0, totalPrice: 0, vat: 19 },
   ]);
@@ -42,6 +47,7 @@ export default function CreateInvoiceModal({
 
   const { data: companies } = useGetCompanies();
   const { data: clients } = useGetClients(selectedCompanyId || null);
+  const { data: lastInvoiceNumber } = useGetLastInvoiceNumber(selectedCompanyId || null);
   const createInvoiceMutation = useCreateInvoice();
 
   const handleAddLine = () => {
@@ -88,12 +94,12 @@ export default function CreateInvoiceModal({
   };
 
   const calculateSubtotal = (): number => {
-    return invoiceLines.reduce((sum, line) => sum + line.totalPrice, 0);
+    return invoiceLines.reduce((sum, line) => sum + (line.totalPrice || line.lineTotal || 0), 0);
   };
 
   const calculateTotalVat = (): number => {
     return invoiceLines.reduce(
-      (sum, line) => sum + (line.totalPrice * line.vat) / 100,
+      (sum, line) => sum + ((line.totalPrice || line.lineTotal || 0) * (line.vat || line.vatRate || 0)) / 100,
       0
     );
   };
@@ -132,6 +138,8 @@ export default function CreateInvoiceModal({
 
     const requestData: CreateInvoiceRequest = {
       companyId: selectedCompanyId,
+      series,
+      number,
       issueDate,
       dueDate,
       invoiceLines: invoiceLines.map((line) => ({
@@ -141,7 +149,6 @@ export default function CreateInvoiceModal({
         totalPrice: line.totalPrice,
         vat: line.vat,
       })),
-      notes: notes || undefined,
     };
 
     if (useExistingClient) {
@@ -151,13 +158,21 @@ export default function CreateInvoiceModal({
     }
 
     try {
-      await createInvoiceMutation.mutateAsync(requestData);
+      const createdInvoice = await createInvoiceMutation.mutateAsync(requestData);
       setSuccessMessage('Invoice created successfully!');
 
-      // Reset form and close modal after a brief delay
+      // Reset form and redirect after a brief delay
       setTimeout(() => {
         resetForm();
         onClose();
+
+        // If callback is provided, use it (for custom behavior)
+        if (onInvoiceCreated) {
+          onInvoiceCreated(createdInvoice);
+        } else {
+          // Default behavior: redirect to invoices page with the new invoice
+          router.push(`/invoices?companyId=${selectedCompanyId}&invoiceId=${createdInvoice.id}`);
+        }
       }, 1500);
     } catch (error: any) {
       setErrorMessage(
@@ -180,11 +195,12 @@ export default function CreateInvoiceModal({
       iban: '',
       bank: '',
     });
+    setSeries('A');
+    setNumber(1);
     setIssueDate(new Date().toISOString().split('T')[0]);
     setDueDate(
       new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
     );
-    setNotes('');
     setInvoiceLines([
       { description: '', quantity: 1, unitPrice: 0, totalPrice: 0, vat: 19 },
     ]);
@@ -197,6 +213,13 @@ export default function CreateInvoiceModal({
       setSelectedClientId('');
     }
   }, [selectedCompanyId]);
+
+  useEffect(() => {
+    if (lastInvoiceNumber) {
+      setSeries(lastInvoiceNumber.series);
+      setNumber(lastInvoiceNumber.number + 1);
+    }
+  }, [lastInvoiceNumber]);
 
   if (!isOpen) return null;
 
@@ -252,6 +275,43 @@ export default function CreateInvoiceModal({
                   </option>
                 ))}
               </select>
+            </div>
+          </div>
+
+          {/* Invoice Series and Number */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label
+                htmlFor="series"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Series <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="series"
+                value={series}
+                onChange={(e) => setSeries(e.target.value)}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                required
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="number"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Number <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="number"
+                id="number"
+                min="1"
+                value={number}
+                onChange={(e) => setNumber(parseInt(e.target.value) || 1)}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                required
+              />
             </div>
           </div>
 
@@ -565,7 +625,7 @@ export default function CreateInvoiceModal({
                         </label>
                         <input
                           type="text"
-                          value={line.totalPrice.toFixed(2)}
+                          value={(line.totalPrice || line.lineTotal || 0).toFixed(2)}
                           readOnly
                           className="block w-full px-2 py-2 text-sm border border-gray-300 rounded-md bg-gray-50"
                         />
@@ -627,24 +687,6 @@ export default function CreateInvoiceModal({
                 </div>
               </div>
             </div>
-          </div>
-
-          {/* Notes */}
-          <div>
-            <label
-              htmlFor="notes"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Notes
-            </label>
-            <textarea
-              id="notes"
-              rows={3}
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              placeholder="Additional notes or payment instructions..."
-            />
           </div>
 
           {/* Form Actions */}

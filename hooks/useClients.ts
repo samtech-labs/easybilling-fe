@@ -8,6 +8,8 @@ export interface CreateClientRequest {
   cui: string;
   address?: string;
   county?: string;
+  city?: string;
+  country?: string;
   regNumber?: string;
   iban?: string;
   bank?: string;
@@ -19,6 +21,8 @@ export interface AnafClientData {
   cui: string;
   address?: string;
   county?: string;
+  city?: string;
+  country?: string;
   regNumber?: string;
   iban?: string;
   bank?: string;

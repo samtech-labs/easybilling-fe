@@ -7,9 +7,13 @@ export interface CreateCompanyRequest {
   cui: string;
   address?: string;
   county?: string;
+  city?: string;
+  country?: string;
   regNumber?: string;
   iban?: string;
   bank?: string;
+  isVatPayer?: boolean;
+  isEFacturaActive?: boolean;
 }
 
 export interface AnafCompanyData {
@@ -18,9 +22,13 @@ export interface AnafCompanyData {
   cui: string;
   address?: string;
   county?: string;
+  city?: string;
+  country?: string;
   regNumber?: string;
   iban?: string;
   bank?: string;
+  isVatPayer: boolean;
+  isEFacturaActive: boolean;
 }
 
 export const useGetCompanies = () => {
