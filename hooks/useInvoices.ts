@@ -90,7 +90,7 @@ export const useSendEfactura = () => {
 
   return useMutation({
     mutationFn: async (invoiceId: string): Promise<any> => {
-      const response = await apiClient.get(
+      const response = await apiClient.post(
         `/invoice/SendEFactura?invoiceId=${invoiceId}`
       );
       return response.data;
