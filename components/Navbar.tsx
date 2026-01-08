@@ -5,8 +5,10 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 
 export default function Navbar() {
+  const t = useTranslations('navbar');
   const router = useRouter();
   const pathname = usePathname();
   const { isAuthenticated, logout } = useAuth();
@@ -74,7 +76,7 @@ export default function Navbar() {
                       d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
                     />
                   </svg>
-                  Logout
+                  {t('logout')}
                 </button>
               </div>
 
@@ -85,7 +87,7 @@ export default function Navbar() {
                   className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 transition-colors"
                   aria-expanded="false"
                 >
-                  <span className="sr-only">Open main menu</span>
+                  <span className="sr-only">{t('openMenu')}</span>
                   {!isMobileMenuOpen ? (
                     <svg
                       className="block h-6 w-6"
@@ -143,7 +145,7 @@ export default function Navbar() {
                   d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
                 />
               </svg>
-              Logout
+              {t('logout')}
             </button>
           </div>
         </div>

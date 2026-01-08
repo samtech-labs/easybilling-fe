@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { useGetAnafStatus, useGetAnafAuthUrl } from '@/hooks/useAnaf';
 
 interface AnafIntegrationProps {
@@ -9,6 +10,7 @@ interface AnafIntegrationProps {
 }
 
 export default function AnafIntegration({ onSuccess, onError }: AnafIntegrationProps) {
+  const tAnaf = useTranslations('anaf');
   const { data: status, isLoading: isLoadingStatus, refetch } = useGetAnafStatus();
   const getAuthUrlMutation = useGetAnafAuthUrl();
   const [isAuthenticating, setIsAuthenticating] = useState(false);
@@ -23,11 +25,11 @@ export default function AnafIntegration({ onSuccess, onError }: AnafIntegrationP
         // Refetch status to confirm token is saved
         await refetch();
 
-        onSuccess?.('ANAF integration successful! Your digital certificate has been registered.');
+        onSuccess?.(tAnaf('integrationSuccess'));
       } else if (event.data.type === 'ANAF_AUTH_ERROR') {
         setIsAuthenticating(false);
 
-        const errorMessage = event.data.error || 'Failed to connect to ANAF. Please try again.';
+        const errorMessage = event.data.error || tAnaf('integrationFailed');
         onError?.(errorMessage);
       }
     };
@@ -37,7 +39,7 @@ export default function AnafIntegration({ onSuccess, onError }: AnafIntegrationP
     return () => {
       window.removeEventListener('message', handleMessage);
     };
-  }, [refetch, onSuccess, onError]);
+  }, [refetch, onSuccess, onError, tAnaf]);
 
   const handleRegisterClick = async () => {
     try {
@@ -57,7 +59,7 @@ export default function AnafIntegration({ onSuccess, onError }: AnafIntegrationP
       );
     } catch (error: any) {
       setIsAuthenticating(false);
-      const errorMessage = error.response?.data?.message || 'Failed to initiate ANAF authorization. Please try again.';
+      const errorMessage = error.response?.data?.message || tAnaf('authorizationFailed');
       onError?.(errorMessage);
     }
   };
@@ -66,7 +68,7 @@ export default function AnafIntegration({ onSuccess, onError }: AnafIntegrationP
     return (
       <div className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 bg-gray-50 rounded-md">
         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
-        <span>Checking ANAF status...</span>
+        <span>{tAnaf('checkingStatus')}</span>
       </div>
     );
   }
@@ -78,14 +80,14 @@ export default function AnafIntegration({ onSuccess, onError }: AnafIntegrationP
           <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
-          <span>ANAF Connected</span>
+          <span>{tAnaf('connected')}</span>
         </div>
         <button
           onClick={handleRegisterClick}
           disabled={isAuthenticating || getAuthUrlMutation.isPending}
           className="px-3 py-1.5 text-xs font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Re-authorize
+          {tAnaf('reauthorize')}
         </button>
       </div>
     );
@@ -119,14 +121,14 @@ export default function AnafIntegration({ onSuccess, onError }: AnafIntegrationP
               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
             ></path>
           </svg>
-          <span>Opening ANAF...</span>
+          <span>{tAnaf('opening')}</span>
         </>
       ) : (
         <>
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
           </svg>
-          <span>Register Digital Sign for E-Factura</span>
+          <span>{tAnaf('registerDigitalSign')}</span>
         </>
       )}
     </button>

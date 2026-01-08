@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useGetCompanies, useDeleteCompany } from '@/hooks/useCompanies';
 import { useAuth } from '@/contexts/AuthContext';
 import CreateCompanyModal from '@/components/CreateCompanyModal';
@@ -13,6 +14,8 @@ import { Company } from '@/types/company';
 export default function CompaniesPage() {
   const router = useRouter();
   const { isAuthenticated, logout } = useAuth();
+  const tCompany = useTranslations('company');
+  const tCommon = useTranslations('common');
   const { data: companies, isLoading, error } = useGetCompanies();
   const deleteCompanyMutation = useDeleteCompany();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -65,7 +68,7 @@ export default function CompaniesPage() {
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading companies...</p>
+          <p className="mt-4 text-gray-600">{tCompany('loadingCompanies')}</p>
         </div>
       </div>
     );
@@ -75,12 +78,12 @@ export default function CompaniesPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <p className="text-red-600">Error loading companies. Please try again.</p>
+          <p className="text-red-600">{tCompany('errorLoadingCompanies')}</p>
           <button
             onClick={() => router.push('/login')}
             className="mt-4 text-indigo-600 hover:text-indigo-800"
           >
-            Back to Login
+            {tCommon('back')}
           </button>
         </div>
       </div>
@@ -94,8 +97,8 @@ export default function CompaniesPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">My Companies</h1>
-              <p className="text-sm text-gray-600 mt-1">Manage your companies and clients</p>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{tCompany('myCompanies')}</h1>
+              <p className="text-sm text-gray-600 mt-1">{tCompany('manageCompaniesClients')}</p>
             </div>
             <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
               <button
@@ -105,7 +108,7 @@ export default function CompaniesPage() {
                 <svg className="w-5 h-5 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                <span className="hidden sm:inline">New Invoice</span>
+                <span className="hidden sm:inline">{tCompany('newInvoice')}</span>
               </button>
               <button
                 onClick={() => setIsCreateModalOpen(true)}
@@ -114,7 +117,7 @@ export default function CompaniesPage() {
                 <svg className="w-5 h-5 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
-                <span className="hidden sm:inline">New Company</span>
+                <span className="hidden sm:inline">{tCompany('newCompany')}</span>
               </button>
             </div>
           </div>
@@ -142,8 +145,8 @@ export default function CompaniesPage() {
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleConfirmDelete}
-        title="Delete Company"
-        message={`Are you sure you want to delete "${companyToDelete?.name}"? This action cannot be undone.`}
+        title={tCommon('delete') + ' ' + tCommon('company')}
+        message={`${tCommon('delete')} "${companyToDelete?.name}"?`}
         isDeleting={deleteCompanyMutation.isPending}
       />
 
@@ -151,7 +154,7 @@ export default function CompaniesPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {companies && companies.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-600">No companies found. Create your first company!</p>
+            <p className="text-gray-600">{tCompany('noCompaniesFound')}</p>
           </div>
         ) : (
           <>
@@ -164,37 +167,37 @@ export default function CompaniesPage() {
                       scope="col"
                       className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                     >
-                      Name
+                      {tCompany('name')}
                     </th>
                     <th
                       scope="col"
                       className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                     >
-                      CUI
+                      {tCompany('cui')}
                     </th>
                     <th
                       scope="col"
                       className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                     >
-                      Address
+                      {tCompany('address')}
                     </th>
                     <th
                       scope="col"
                       className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                     >
-                      County
+                      {tCompany('county')}
                     </th>
                     <th
                       scope="col"
                       className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                     >
-                      Reg Number
+                      {tCompany('regNumber')}
                     </th>
                     <th
                       scope="col"
                       className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
                     >
-                      Actions
+                      {tCompany('actions')}
                     </th>
                   </tr>
                 </thead>
@@ -283,25 +286,25 @@ export default function CompaniesPage() {
                   <div className="space-y-2 text-sm">
                     {company.address && (
                       <div className="flex">
-                        <span className="text-gray-500 font-medium w-24">Address:</span>
+                        <span className="text-gray-500 font-medium w-24">{tCompany('address')}:</span>
                         <span className="text-gray-900 flex-1">{company.address}</span>
                       </div>
                     )}
                     {company.county && (
                       <div className="flex">
-                        <span className="text-gray-500 font-medium w-24">County:</span>
+                        <span className="text-gray-500 font-medium w-24">{tCompany('county')}:</span>
                         <span className="text-gray-900">{company.county}</span>
                       </div>
                     )}
                     {company.regNumber && (
                       <div className="flex">
-                        <span className="text-gray-500 font-medium w-24">Reg Number:</span>
+                        <span className="text-gray-500 font-medium w-24">{tCompany('regNumber')}:</span>
                         <span className="text-gray-900">{company.regNumber}</span>
                       </div>
                     )}
                   </div>
                   <div className="mt-3 pt-3 border-t border-gray-200">
-                    <p className="text-xs text-gray-500">Tap to view clients</p>
+                    <p className="text-xs text-gray-500">{tCompany('tapToViewClients')}</p>
                   </div>
                 </div>
               ))}

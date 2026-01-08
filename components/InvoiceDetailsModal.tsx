@@ -2,6 +2,7 @@
 
 import { Invoice, AnafSubmissionStatus } from '@/types/invoice';
 import { useGenerateInvoicePdf, useSendEfactura, useGetAnafSubmissionStatus, useDownloadAnafResponse } from '@/hooks/useInvoices';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
 interface InvoiceDetailsModalProps {
@@ -11,6 +12,8 @@ interface InvoiceDetailsModalProps {
 }
 
 export default function InvoiceDetailsModal({ isOpen, onClose, invoice }: InvoiceDetailsModalProps) {
+  const tInvoice = useTranslations('invoice');
+  const tCommon = useTranslations('common');
   const generatePdfMutation = useGenerateInvoicePdf();
   const sendEfacturaMutation = useSendEfactura();
   const downloadAnafResponseMutation = useDownloadAnafResponse();
@@ -37,7 +40,7 @@ export default function InvoiceDetailsModal({ isOpen, onClose, invoice }: Invoic
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Failed to generate PDF:', error);
-      alert('Failed to generate PDF. Please try again.');
+      alert(tInvoice('invoiceCreatedError'));
     } finally {
       setIsDownloading(false);
     }
@@ -71,7 +74,7 @@ export default function InvoiceDetailsModal({ isOpen, onClose, invoice }: Invoic
       window.URL.revokeObjectURL(url);
     } catch (error: any) {
       console.error('Failed to download ANAF response:', error);
-      alert('Failed to download ANAF response. Please try again.');
+      alert(tInvoice('invoiceCreatedError'));
     } finally {
       setIsDownloadingAnafResponse(false);
     }
@@ -89,7 +92,7 @@ export default function InvoiceDetailsModal({ isOpen, onClose, invoice }: Invoic
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
             </svg>
-            Send EFactura
+            {tInvoice('sendEfactura')}
           </>
         ),
       };
@@ -109,7 +112,7 @@ export default function InvoiceDetailsModal({ isOpen, onClose, invoice }: Invoic
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              {anafStatus.status === AnafSubmissionStatus.Pending ? 'Pending...' : 'Processing...'}
+              {anafStatus.status === AnafSubmissionStatus.Pending ? tInvoice('pending') : tInvoice('processing')}
             </>
           ),
         };
@@ -125,7 +128,7 @@ export default function InvoiceDetailsModal({ isOpen, onClose, invoice }: Invoic
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
-              EFactura Sent Successfully
+              {tInvoice('efacturaSentSuccessfully')}
             </>
           ),
         };
@@ -141,7 +144,7 @@ export default function InvoiceDetailsModal({ isOpen, onClose, invoice }: Invoic
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              Retry Send
+              {tInvoice('retrySend')}
             </>
           ),
         };
@@ -156,7 +159,7 @@ export default function InvoiceDetailsModal({ isOpen, onClose, invoice }: Invoic
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
               </svg>
-              Send EFactura
+              {tInvoice('sendEfactura')}
             </>
           ),
         };
@@ -183,10 +186,10 @@ export default function InvoiceDetailsModal({ isOpen, onClose, invoice }: Invoic
         <div className="flex justify-between items-start mb-4">
           <div className="flex-1">
             <h3 className="text-lg sm:text-xl font-bold text-gray-900">
-              Invoice {invoice.series} {invoice.number}
+              {tCommon('invoice')} {invoice.series} {invoice.number}
             </h3>
             <p className="text-sm text-gray-600 mt-1">
-              Issue Date: {formatDate(invoice.date)}
+              {tInvoice('issueDate')}: {formatDate(invoice.date)}
             </p>
           </div>
           <button
@@ -201,12 +204,12 @@ export default function InvoiceDetailsModal({ isOpen, onClose, invoice }: Invoic
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           {/* Company Info */}
           <div className="bg-gray-50 rounded-lg p-4">
-            <h4 className="text-sm font-semibold text-gray-700 mb-2">From</h4>
+            <h4 className="text-sm font-semibold text-gray-700 mb-2">{tInvoice('from')}</h4>
             <div className="space-y-1">
               <p className="font-medium text-gray-900">{invoice.company.name}</p>
-              <p className="text-sm text-gray-600">CUI: {invoice.company.cui}</p>
+              <p className="text-sm text-gray-600">{tInvoice('cui')}: {invoice.company.cui}</p>
               {invoice.company.regNumber && (
-                <p className="text-sm text-gray-600">Reg No: {invoice.company.regNumber}</p>
+                <p className="text-sm text-gray-600">{tInvoice('regNo')}: {invoice.company.regNumber}</p>
               )}
               {invoice.company.address && (
                 <p className="text-sm text-gray-600">{invoice.company.address}</p>
@@ -219,12 +222,12 @@ export default function InvoiceDetailsModal({ isOpen, onClose, invoice }: Invoic
 
           {/* Client Info */}
           <div className="bg-gray-50 rounded-lg p-4">
-            <h4 className="text-sm font-semibold text-gray-700 mb-2">To</h4>
+            <h4 className="text-sm font-semibold text-gray-700 mb-2">{tInvoice('to')}</h4>
             <div className="space-y-1">
               <p className="font-medium text-gray-900">{invoice.client.name}</p>
-              <p className="text-sm text-gray-600">CUI: {invoice.client.cui}</p>
+              <p className="text-sm text-gray-600">{tInvoice('cui')}: {invoice.client.cui}</p>
               {invoice.client.regNumber && (
-                <p className="text-sm text-gray-600">Reg No: {invoice.client.regNumber}</p>
+                <p className="text-sm text-gray-600">{tInvoice('regNo')}: {invoice.client.regNumber}</p>
               )}
               {invoice.client.address && (
                 <p className="text-sm text-gray-600">{invoice.client.address}</p>
@@ -238,7 +241,7 @@ export default function InvoiceDetailsModal({ isOpen, onClose, invoice }: Invoic
 
         {/* Invoice Lines */}
         <div className="mb-6">
-          <h4 className="text-sm font-semibold text-gray-700 mb-3">Items</h4>
+          <h4 className="text-sm font-semibold text-gray-700 mb-3">{tInvoice('items')}</h4>
 
           {/* Desktop Table */}
           <div className="hidden md:block overflow-x-auto">
@@ -246,19 +249,19 @@ export default function InvoiceDetailsModal({ isOpen, onClose, invoice }: Invoic
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Description
+                    {tInvoice('description')}
                   </th>
                   <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Quantity
+                    {tInvoice('quantity')}
                   </th>
                   <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Unit Price
+                    {tInvoice('unitPrice')}
                   </th>
                   <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    VAT (%)
+                    {tInvoice('vat')} (%)
                   </th>
                   <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Total
+                    {tInvoice('total')}
                   </th>
                 </tr>
               </thead>
@@ -287,19 +290,19 @@ export default function InvoiceDetailsModal({ isOpen, onClose, invoice }: Invoic
                 <div className="font-medium text-gray-900 mb-2">{line.description}</div>
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div>
-                    <span className="text-gray-500">Quantity:</span>
+                    <span className="text-gray-500">{tInvoice('quantity')}:</span>
                     <span className="ml-1 text-gray-900">{line.quantity}</span>
                   </div>
                   <div className="text-right">
-                    <span className="text-gray-500">Unit Price:</span>
+                    <span className="text-gray-500">{tInvoice('unitPrice')}:</span>
                     <span className="ml-1 text-gray-900">{line.unitPrice.toFixed(2)} RON</span>
                   </div>
                   <div>
-                    <span className="text-gray-500">VAT:</span>
+                    <span className="text-gray-500">{tInvoice('vat')}:</span>
                     <span className="ml-1 text-gray-900">{(line.vatRate || line.vat || 0)}%</span>
                   </div>
                   <div className="text-right">
-                    <span className="text-gray-500">Total:</span>
+                    <span className="text-gray-500">{tInvoice('total')}:</span>
                     <span className="ml-1 font-medium text-gray-900">{((line.lineTotal || line.totalPrice || (line.quantity * line.unitPrice)) || 0).toFixed(2)} RON</span>
                   </div>
                 </div>
@@ -312,15 +315,15 @@ export default function InvoiceDetailsModal({ isOpen, onClose, invoice }: Invoic
         <div className="bg-gray-50 rounded-lg p-4 mb-6">
           <div className="space-y-2">
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-gray-700">Subtotal:</span>
+              <span className="text-sm font-medium text-gray-700">{tInvoice('subtotal')}:</span>
               <span className="text-sm text-gray-900">{invoice.totalAmount.toFixed(2)} RON</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-gray-700">Total VAT:</span>
+              <span className="text-sm font-medium text-gray-700">{tInvoice('totalVat')}:</span>
               <span className="text-sm text-gray-900">{invoice.totalVat.toFixed(2)} RON</span>
             </div>
             <div className="flex justify-between items-center pt-2 border-t border-gray-300">
-              <span className="text-base font-bold text-gray-900">Grand Total:</span>
+              <span className="text-base font-bold text-gray-900">{tInvoice('grandTotal')}:</span>
               <span className="text-base font-bold text-indigo-600">{invoice.grandTotal.toFixed(2)} RON</span>
             </div>
           </div>
@@ -336,7 +339,7 @@ export default function InvoiceDetailsModal({ isOpen, onClose, invoice }: Invoic
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              View Error
+              {tInvoice('viewError')}
             </button>
           )}
           {anafStatus?.status === AnafSubmissionStatus.Ok && anafStatus.downloadId && (
@@ -351,14 +354,14 @@ export default function InvoiceDetailsModal({ isOpen, onClose, invoice }: Invoic
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Downloading...
+                  {tInvoice('downloading')}
                 </>
               ) : (
                 <>
                   <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
-                  Download ANAF Response
+                  {tInvoice('downloadAnafResponse')}
                 </>
               )}
             </button>
@@ -397,7 +400,7 @@ export default function InvoiceDetailsModal({ isOpen, onClose, invoice }: Invoic
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                   ></path>
                 </svg>
-                Generating PDF...
+                {tInvoice('generatingPdf')}
               </>
             ) : (
               <>
@@ -414,7 +417,7 @@ export default function InvoiceDetailsModal({ isOpen, onClose, invoice }: Invoic
                     d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                   />
                 </svg>
-                Download PDF
+                {tInvoice('downloadPdf')}
               </>
             )}
           </button>
@@ -422,7 +425,7 @@ export default function InvoiceDetailsModal({ isOpen, onClose, invoice }: Invoic
             onClick={onClose}
             className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 min-h-[44px]"
           >
-            Close
+            {tCommon('close')}
           </button>
         </div>
       </div>
@@ -438,7 +441,7 @@ export default function InvoiceDetailsModal({ isOpen, onClose, invoice }: Invoic
                 </svg>
               </div>
               <div className="ml-3 flex-1">
-                <h3 className="text-lg font-medium text-gray-900">ANAF Submission Error</h3>
+                <h3 className="text-lg font-medium text-gray-900">{tInvoice('anafSubmissionError')}</h3>
                 <div className="mt-2">
                   <p className="text-sm text-gray-700 whitespace-pre-wrap break-words">{anafStatus.errorMessage}</p>
                 </div>
@@ -449,7 +452,7 @@ export default function InvoiceDetailsModal({ isOpen, onClose, invoice }: Invoic
                 onClick={() => setShowErrorModal(false)}
                 className="px-4 py-2 text-sm font-medium text-white bg-gray-600 hover:bg-gray-700 rounded-md transition-colors"
               >
-                Close
+                {tCommon('close')}
               </button>
             </div>
           </div>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useGetInvoices, useGenerateInvoicePdf } from '@/hooks/useInvoices';
 import { useGetCompanies } from '@/hooks/useCompanies';
 import { useAuth } from '@/contexts/AuthContext';
@@ -18,6 +19,9 @@ export default function InvoicesPage() {
   const companyId = searchParams.get('companyId') || '';
   const invoiceId = searchParams.get('invoiceId');
   const { isAuthenticated, logout } = useAuth();
+  const tInvoice = useTranslations('invoice');
+  const tAnaf = useTranslations('anaf');
+  const tCommon = useTranslations('common');
   const { data: companies } = useGetCompanies();
   const { data: invoices, isLoading, error } = useGetInvoices(companyId);
   const generatePdfMutation = useGenerateInvoicePdf();
@@ -110,7 +114,7 @@ export default function InvoicesPage() {
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading invoices...</p>
+          <p className="mt-4 text-gray-600">{tInvoice('loadingInvoices')}</p>
         </div>
       </div>
     );
@@ -120,12 +124,12 @@ export default function InvoicesPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <p className="text-red-600">Error loading invoices. Please try again.</p>
+          <p className="text-red-600">{tInvoice('errorLoadingInvoices')}</p>
           <button
             onClick={() => router.push('/companies')}
             className="mt-4 text-indigo-600 hover:text-indigo-800"
           >
-            Back to Companies
+            {tCommon('back')}
           </button>
         </div>
       </div>
@@ -145,12 +149,12 @@ export default function InvoicesPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Invoices</h1>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{tCommon('invoices')}</h1>
               {company && (
                 <p className="text-sm text-gray-600 mt-1">
                   <span className="font-medium">{company.name}</span>
                   <span className="hidden sm:inline"> - {company.cui}</span>
-                  <span className="block sm:hidden text-xs">CUI: {company.cui}</span>
+                  <span className="block sm:hidden text-xs">{tInvoice('cui')}: {company.cui}</span>
                 </p>
               )}
             </div>
@@ -161,7 +165,7 @@ export default function InvoicesPage() {
               <svg className="w-5 h-5 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              <span className="hidden sm:inline">New Invoice</span>
+              <span className="hidden sm:inline">{tInvoice('createInvoice')}</span>
             </button>
           </div>
         </div>
@@ -173,9 +177,9 @@ export default function InvoicesPage() {
         <div className="mb-6 bg-white shadow rounded-lg p-4 sm:p-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex-1">
-              <h2 className="text-lg font-semibold text-gray-900">E-Factura Integration</h2>
+              <h2 className="text-lg font-semibold text-gray-900">{tInvoice('efacturaIntegration')}</h2>
               <p className="mt-1 text-sm text-gray-600">
-                Connect your digital certificate to enable electronic invoicing with ANAF.
+                {tInvoice('connectDigitalCertificate')}
               </p>
             </div>
             <div className="flex-shrink-0">
@@ -202,12 +206,12 @@ export default function InvoicesPage() {
                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
               />
             </svg>
-            <p className="mt-4 text-gray-600">No invoices found for this company.</p>
+            <p className="mt-4 text-gray-600">{tInvoice('noInvoicesFound')}</p>
             <button
               onClick={() => router.push('/companies')}
               className="mt-4 inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md"
             >
-              Create New Invoice
+              {tInvoice('createInvoice')}
             </button>
           </div>
         ) : (
@@ -221,43 +225,43 @@ export default function InvoicesPage() {
                       scope="col"
                       className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                     >
-                      Invoice Number
+                      {tInvoice('invoiceNumber')}
                     </th>
                     <th
                       scope="col"
                       className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                     >
-                      Client
+                      {tInvoice('client')}
                     </th>
                     <th
                       scope="col"
                       className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                     >
-                      Issue Date
+                      {tInvoice('issueDate')}
                     </th>
                     <th
                       scope="col"
                       className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
                     >
-                      Total Amount
+                      {tInvoice('totalAmount')}
                     </th>
                     <th
                       scope="col"
                       className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
                     >
-                      VAT
+                      {tInvoice('vat')}
                     </th>
                     <th
                       scope="col"
                       className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
                     >
-                      Grand Total
+                      {tInvoice('grandTotal')}
                     </th>
                     <th
                       scope="col"
                       className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
                     >
-                      Actions
+                      {tCommon('view')}
                     </th>
                   </tr>
                 </thead>
@@ -273,7 +277,7 @@ export default function InvoicesPage() {
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900">
                         <div className="font-medium">{invoice.client.name}</div>
-                        <div className="text-gray-500 text-xs">CUI: {invoice.client.cui}</div>
+                        <div className="text-gray-500 text-xs">{tInvoice('cui')}: {invoice.client.cui}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {formatDate(invoice.date)}
@@ -316,7 +320,7 @@ export default function InvoicesPage() {
                                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                                 ></path>
                               </svg>
-                              Generating...
+                              {tInvoice('generating')}
                             </>
                           ) : (
                             <>
@@ -333,7 +337,7 @@ export default function InvoicesPage() {
                                   d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                                 />
                               </svg>
-                              Download PDF
+                              {tInvoice('downloadPdf')}
                             </>
                           )}
                         </button>
@@ -358,25 +362,25 @@ export default function InvoicesPage() {
                         {invoice.series} {invoice.number}
                       </h3>
                       <p className="text-sm text-gray-900 font-medium mt-1">{invoice.client.name}</p>
-                      <p className="text-xs text-gray-500">CUI: {invoice.client.cui}</p>
+                      <p className="text-xs text-gray-500">{tInvoice('cui')}: {invoice.client.cui}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs text-gray-500">Grand Total</p>
+                      <p className="text-xs text-gray-500">{tInvoice('grandTotal')}</p>
                       <p className="text-lg font-bold text-indigo-600">{invoice.grandTotal.toFixed(2)} RON</p>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3 mb-4 text-sm">
                     <div>
-                      <p className="text-xs text-gray-500">Issue Date</p>
+                      <p className="text-xs text-gray-500">{tInvoice('issueDate')}</p>
                       <p className="font-medium text-gray-900">{formatDate(invoice.date)}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs text-gray-500">Total Amount</p>
+                      <p className="text-xs text-gray-500">{tInvoice('totalAmount')}</p>
                       <p className="font-medium text-gray-900">{invoice.totalAmount.toFixed(2)} RON</p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500">VAT</p>
+                      <p className="text-xs text-gray-500">{tInvoice('vat')}</p>
                       <p className="font-medium text-gray-900">{invoice.totalVat.toFixed(2)} RON</p>
                     </div>
                   </div>
@@ -408,7 +412,7 @@ export default function InvoicesPage() {
                             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                           ></path>
                         </svg>
-                        Generating PDF...
+                        {tInvoice('generatingPdf')}
                       </>
                     ) : (
                       <>
@@ -425,7 +429,7 @@ export default function InvoicesPage() {
                             d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                           />
                         </svg>
-                        Download PDF
+                        {tInvoice('downloadPdf')}
                       </>
                     )}
                   </button>
@@ -441,7 +445,7 @@ export default function InvoicesPage() {
             <div className="bg-white overflow-hidden shadow rounded-lg">
               <div className="px-4 py-5 sm:p-6">
                 <dt className="text-sm font-medium text-gray-500 truncate">
-                  Total Invoices
+                  {tInvoice('totalInvoices')}
                 </dt>
                 <dd className="mt-1 text-3xl font-semibold text-gray-900">
                   {sortedInvoices.length}
@@ -451,7 +455,7 @@ export default function InvoicesPage() {
             <div className="bg-white overflow-hidden shadow rounded-lg">
               <div className="px-4 py-5 sm:p-6">
                 <dt className="text-sm font-medium text-gray-500 truncate">
-                  Total Revenue
+                  {tInvoice('totalRevenue')}
                 </dt>
                 <dd className="mt-1 text-3xl font-semibold text-gray-900">
                   {sortedInvoices
@@ -464,7 +468,7 @@ export default function InvoicesPage() {
             <div className="bg-white overflow-hidden shadow rounded-lg">
               <div className="px-4 py-5 sm:p-6">
                 <dt className="text-sm font-medium text-gray-500 truncate">
-                  Total VAT
+                  {tInvoice('totalVat')}
                 </dt>
                 <dd className="mt-1 text-3xl font-semibold text-gray-900">
                   {sortedInvoices

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useGetClients, useDeleteClient } from '@/hooks/useClients';
 import { Company } from '@/types/company';
 import { Client } from '@/types/client';
@@ -16,6 +17,9 @@ interface ClientsModalProps {
 
 export default function ClientsModal({ isOpen, onClose, company }: ClientsModalProps) {
   const router = useRouter();
+  const tClient = useTranslations('client');
+  const tCompany = useTranslations('company');
+  const tCommon = useTranslations('common');
   const { data: clients, isLoading, error } = useGetClients(company?.id || null);
   const deleteClientMutation = useDeleteClient(company?.id || '');
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -54,7 +58,7 @@ export default function ClientsModal({ isOpen, onClose, company }: ClientsModalP
         <div className="flex flex-col gap-3 mb-4">
           <div className="flex justify-between items-start">
             <div className="flex-1">
-              <h3 className="text-lg sm:text-xl font-bold text-gray-900">Clients</h3>
+              <h3 className="text-lg sm:text-xl font-bold text-gray-900">{tCommon('clients')}</h3>
               <p className="text-sm text-gray-600 mt-1">
                 <span className="font-medium">{company.name}</span>
               </p>
@@ -74,7 +78,7 @@ export default function ClientsModal({ isOpen, onClose, company }: ClientsModalP
               <svg className="w-5 h-5 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              <span className="hidden sm:inline">View Invoices</span>
+              <span className="hidden sm:inline">{tClient('viewInvoices')}</span>
             </button>
             <button
               onClick={() => setIsCreateModalOpen(true)}
@@ -83,7 +87,7 @@ export default function ClientsModal({ isOpen, onClose, company }: ClientsModalP
               <svg className="w-5 h-5 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              <span className="hidden sm:inline">New Client</span>
+              <span className="hidden sm:inline">{tClient('newClient')}</span>
             </button>
           </div>
         </div>
@@ -96,7 +100,7 @@ export default function ClientsModal({ isOpen, onClose, company }: ClientsModalP
 
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded mb-4">
-            Error loading clients. Please try again.
+            {tClient('errorLoadingClients')}
           </div>
         )}
 
@@ -104,7 +108,7 @@ export default function ClientsModal({ isOpen, onClose, company }: ClientsModalP
           <>
             {clients && clients.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-gray-600">No clients found for this company.</p>
+                <p className="text-gray-600">{tClient('noClientsFound')}</p>
               </div>
             ) : (
               <>
@@ -117,37 +121,37 @@ export default function ClientsModal({ isOpen, onClose, company }: ClientsModalP
                           scope="col"
                           className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                         >
-                          Name
+                          {tCompany('name')}
                         </th>
                         <th
                           scope="col"
                           className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                         >
-                          CUI
+                          {tCompany('cui')}
                         </th>
                         <th
                           scope="col"
                           className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                         >
-                          Address
+                          {tCompany('address')}
                         </th>
                         <th
                           scope="col"
                           className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                         >
-                          County
+                          {tCompany('county')}
                         </th>
                         <th
                           scope="col"
                           className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                         >
-                          Reg Number
+                          {tCompany('regNumber')}
                         </th>
                         <th
                           scope="col"
                           className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
                         >
-                          Actions
+                          {tCompany('actions')}
                         </th>
                       </tr>
                     </thead>
@@ -173,7 +177,7 @@ export default function ClientsModal({ isOpen, onClose, company }: ClientsModalP
                             <button
                               onClick={(e) => handleDeleteClick(e, client)}
                               className="text-red-600 hover:text-red-900 transition-colors"
-                              title="Delete client"
+                              title={tCommon('delete') + ' ' + tCommon('client').toLowerCase()}
                             >
                               <svg
                                 className="w-5 h-5"
@@ -211,7 +215,7 @@ export default function ClientsModal({ isOpen, onClose, company }: ClientsModalP
                         <button
                           onClick={(e) => handleDeleteClick(e, client)}
                           className="ml-2 p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
-                          title="Delete client"
+                          title={tCommon('delete') + ' ' + tCommon('client').toLowerCase()}
                         >
                           <svg
                             className="w-5 h-5"
@@ -231,19 +235,19 @@ export default function ClientsModal({ isOpen, onClose, company }: ClientsModalP
                       <div className="space-y-2 text-sm">
                         {client.address && (
                           <div className="flex">
-                            <span className="text-gray-500 font-medium w-28">Address:</span>
+                            <span className="text-gray-500 font-medium w-28">{tCompany('address')}:</span>
                             <span className="text-gray-900 flex-1">{client.address}</span>
                           </div>
                         )}
                         {client.county && (
                           <div className="flex">
-                            <span className="text-gray-500 font-medium w-28">County:</span>
+                            <span className="text-gray-500 font-medium w-28">{tCompany('county')}:</span>
                             <span className="text-gray-900">{client.county}</span>
                           </div>
                         )}
                         {client.regNumber && (
                           <div className="flex">
-                            <span className="text-gray-500 font-medium w-28">Reg Number:</span>
+                            <span className="text-gray-500 font-medium w-28">{tCompany('regNumber')}:</span>
                             <span className="text-gray-900">{client.regNumber}</span>
                           </div>
                         )}
@@ -261,7 +265,7 @@ export default function ClientsModal({ isOpen, onClose, company }: ClientsModalP
             onClick={onClose}
             className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 min-h-[44px]"
           >
-            Close
+            {tCommon('close')}
           </button>
         </div>
       </div>
@@ -278,8 +282,8 @@ export default function ClientsModal({ isOpen, onClose, company }: ClientsModalP
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleConfirmDelete}
-        title="Delete Client"
-        message={`Are you sure you want to delete "${clientToDelete?.name}"? This action cannot be undone.`}
+        title={tCommon('delete') + ' ' + tCommon('client')}
+        message={`${tCommon('delete')} "${clientToDelete?.name}"?`}
         isDeleting={deleteClientMutation.isPending}
       />
     </div>
