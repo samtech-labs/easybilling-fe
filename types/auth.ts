@@ -20,4 +20,5 @@ export interface AuthContextType {
   logout: () => void;
   isAuthenticated: boolean;
   setAuthToken: (token: string) => void;
+  userRole: string | null;
 }

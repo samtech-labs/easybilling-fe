@@ -27,7 +27,8 @@
     "download": "Descarcă",
     "upload": "Încarcă",
     "view": "Vizualizează",
-    "retry": "Reîncearcă"
+    "retry": "Reîncearcă",
+    "logout": "Deconectare"
   },
   "navbar": {
     "home": "Acasă",
@@ -35,6 +36,7 @@
     "clients": "Clienți",
     "invoices": "Facturi",
     "settings": "Setări",
+    "admin": "Administrare",
     "logout": "Deconectare",
     "login": "Autentificare",
     "openMenu": "Deschide meniul principal"
@@ -224,5 +226,52 @@
   },
   "deleteConfirmation": {
     "deleting": "Se șterge..."
+  },
+  "admin": {
+    "adminPanel": "Panou Administrare",
+    "userManagement": "Gestionare Utilizatori",
+    "users": "Utilizatori",
+    "createUser": "Creează Utilizator",
+    "editUser": "Editează Utilizator",
+    "deleteUser": "Șterge Utilizator",
+    "assignCompany": "Atribuie Companie",
+    "createCompanyForUser": "Creează Companie pentru Utilizator",
+    "username": "Nume Utilizator",
+    "email": "Email",
+    "role": "Rol",
+    "password": "Parolă",
+    "selectUser": "Selectați un utilizator...",
+    "selectRole": "Selectați un rol...",
+    "enterUsername": "Introduceți numele de utilizator",
+    "enterEmail": "Introduceți adresa de email",
+    "enterPassword": "Introduceți parola",
+    "userCreatedSuccess": "Utilizator creat cu succes!",
+    "userCreatedError": "Eroare la crearea utilizatorului. Vă rugăm încercați din nou.",
+    "userUpdatedSuccess": "Utilizator actualizat cu succes!",
+    "userUpdatedError": "Eroare la actualizarea utilizatorului. Vă rugăm încercați din nou.",
+    "userDeletedSuccess": "Utilizator șters cu succes!",
+    "userDeletedError": "Eroare la ștergerea utilizatorului. Vă rugăm încercați din nou.",
+    "companyAssignedSuccess": "Companie atribuită cu succes!",
+    "companyAssignedError": "Eroare la atribuirea companiei. Vă rugăm încercați din nou.",
+    "confirmDeleteUser": "Sunteți sigur că doriți să ștergeți acest utilizator?",
+    "loadingUsers": "Se încarcă utilizatorii...",
+    "errorLoadingUsers": "Eroare la încărcarea utilizatorilor. Vă rugăm încercați din nou.",
+    "noUsersFound": "Niciun utilizator găsit.",
+    "actions": "Acțiuni",
+    "usernameRequired": "Numele de utilizator este obligatoriu",
+    "emailRequired": "Adresa de email este obligatorie",
+    "passwordRequired": "Parola este obligatorie",
+    "roleRequired": "Rolul este obligatoriu",
+    "minPasswordLength": "Parola trebuie să conțină cel puțin 6 caractere",
+    "minUsernameLength": "Numele de utilizator trebuie să conțină cel puțin 3 caractere",
+    "roles": {
+      "ADMIN": "Administrator",
+      "USER": "Utilizator",
+      "ACCOUNTANT": "Contabil"
+    },
+    "userDetails": "Detalii Utilizator",
+    "companies": "Companii",
+    "userCompanies": "Companiile Utilizatorului",
+    "noCompaniesAssigned": "Nicio companie atribuită acestui utilizator."
   }
 }
