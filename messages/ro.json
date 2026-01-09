@@ -183,7 +183,15 @@
     "enterVat": "Introduceți TVA (%)",
     "cui": "CUI",
     "regNo": "Nr. Înreg",
-    "generating": "Se generează..."
+    "generating": "Se generează...",
+    "creditNote": "Factură Storno",
+    "createCreditNote": "Creează Factură Storno",
+    "originalInvoice": "Factura Originală",
+    "creditNoteFor": "Factură Storno pentru",
+    "creditNoteCreatedSuccess": "Factură Storno creată cu succes!",
+    "creditNoteCreatedError": "Eroare la crearea facturii storno. Vă rugăm încercați din nou.",
+    "editLines": "Editați liniile facturii storno",
+    "creditNoteLines": "Linii Factură Storno"
   },
   "validation": {
     "fieldRequired": "Acest câmp este obligatoriu",

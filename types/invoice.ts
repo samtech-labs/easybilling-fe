@@ -11,6 +11,11 @@ export interface InvoiceLine {
   lineTotalWithVat?: number; // Backend calculated property
 }
 
+export enum InvoiceType {
+  Invoice = 380,
+  CreditNote = 381,
+}
+
 export interface Invoice {
   id: string;
   date: string;
@@ -20,6 +25,9 @@ export interface Invoice {
   totalAmount: number;
   totalVat: number;
   grandTotal: number;
+  type?: InvoiceType;
+  originalInvoiceId?: string;
+  originalInvoiceNumber?: string;
   company: {
     id: string;
     name: string;
@@ -78,4 +86,11 @@ export interface AnafSubmissionStatusDto {
   uploadedAt?: string;
   lastCheckedAt?: string;
   downloadId?: string;
+}
+
+export interface CreateCreditNoteRequest {
+  originalInvoiceId: string;
+  series?: string;
+  number?: string;
+  lines?: InvoiceLine[];
 }
