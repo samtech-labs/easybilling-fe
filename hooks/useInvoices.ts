@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '@/lib/api-client';
-import { Invoice, CreateInvoiceRequest, LastInvoiceNumber, AnafSubmissionStatusDto } from '@/types/invoice';
+import { Invoice, CreateInvoiceRequest, CreateCreditNoteRequest, LastInvoiceNumber, AnafSubmissionStatusDto } from '@/types/invoice';
 
 export const useGetInvoices = (companyId: string) => {
   return useQuery({
@@ -8,6 +8,19 @@ export const useGetInvoices = (companyId: string) => {
     queryFn: async (): Promise<Invoice[]> => {
       const response = await apiClient.get<Invoice[]>(
         `/invoice/GetAllInvoices?companyId=${companyId}`
+      );
+      return response.data;
+    },
+    enabled: !!companyId,
+  });
+};
+
+export const useGetCreditNotes = (companyId: string) => {
+  return useQuery({
+    queryKey: ['creditNotes', companyId],
+    queryFn: async (): Promise<Invoice[]> => {
+      const response = await apiClient.get<Invoice[]>(
+        `/invoice/GetAllCreditNotes?companyId=${companyId}`
       );
       return response.data;
     },
@@ -133,6 +146,24 @@ export const useDownloadAnafResponse = () => {
         }
       );
       return response.data;
+    },
+  });
+};
+
+export const useCreateCreditNote = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: CreateCreditNoteRequest): Promise<Invoice> => {
+      const response = await apiClient.post<Invoice>(
+        '/invoice/CreateCreditNote',
+        data
+      );
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      queryClient.invalidateQueries({ queryKey: ['creditNotes'] });
     },
   });
 };
