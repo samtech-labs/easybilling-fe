@@ -37,8 +37,8 @@ export default function Navbar() {
                 <Image
                   src="/easybilling-icon.svg"
                   alt="EasyBilling"
-                  width={40}
-                  height={40}
+                  width={48}
+                  height={48}
                   priority
                 />
               </div>
@@ -47,8 +47,8 @@ export default function Navbar() {
                 <Image
                   src="/easybilling-logo.svg"
                   alt="EasyBilling"
-                  width={180}
-                  height={54}
+                  width={220}
+                  height={66}
                   priority
                 />
               </div>

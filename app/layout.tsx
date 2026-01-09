@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "EasyBilling - Invoice Management",
-  description: "Manage your invoices and companies with ease",
+  title: "EazyBiz Invoice",
+  description: "Manage your invoices with ease",
   icons: {
     icon: '/easybilling-icon.svg',
   },
