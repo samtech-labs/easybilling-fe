@@ -75,6 +75,7 @@ export const useDeleteCompany = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['companies'] });
+      queryClient.invalidateQueries({ queryKey: ['companies-for-user'] });
     },
   });
 };
