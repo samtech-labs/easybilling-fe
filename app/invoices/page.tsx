@@ -13,6 +13,7 @@ import AnafIntegration from '@/components/AnafIntegration';
 import InvoiceDetailsModal from '@/components/InvoiceDetailsModal';
 import CreateInvoiceModal from '@/components/CreateInvoiceModal';
 import CreateCreditNoteModal from '@/components/CreateCreditNoteModal';
+import DownloadInvoiceNameDialog from '@/components/DownloadInvoiceNameDialog';
 
 export default function InvoicesPage() {
   const router = useRouter();
@@ -37,6 +38,8 @@ export default function InvoicesPage() {
   const [isCreateInvoiceModalOpen, setIsCreateInvoiceModalOpen] = useState(false);
   const [isCreateCreditNoteModalOpen, setIsCreateCreditNoteModalOpen] = useState(false);
   const [creditNoteSourceInvoice, setCreditNoteSourceInvoice] = useState<Invoice | null>(null);
+  const [showDownloadNameDialog, setShowDownloadNameDialog] = useState(false);
+  const [pendingDownload, setPendingDownload] = useState<{ blob: Blob; invoice: Invoice } | null>(null);
 
   const company = companies?.find((c) => c.id === companyId);
 
@@ -50,27 +53,45 @@ export default function InvoicesPage() {
     setIsInvoiceModalOpen(true);
   };
 
-  const handleDownloadPdf = async (e: React.MouseEvent, invoice: Invoice) => {
+  const handleDownloadPdfClick = async (e: React.MouseEvent, invoice: Invoice) => {
     e.stopPropagation(); // Prevent row click event
     setDownloadingInvoiceId(invoice.id);
     try {
       const pdfBlob = await generatePdfMutation.mutateAsync(invoice.id);
+      setPendingDownload({ blob: pdfBlob, invoice });
+      setShowDownloadNameDialog(true);
+    } catch (error) {
+      console.error('Failed to generate PDF:', error);
+      alert('Failed to generate PDF. Please try again.');
+      setDownloadingInvoiceId(null);
+    }
+  };
 
+  const handleConfirmDownload = (customName: string) => {
+    if (!pendingDownload) return;
+
+    try {
       // Create a download link
-      const url = window.URL.createObjectURL(pdfBlob);
+      const url = window.URL.createObjectURL(pendingDownload.blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `Invoice_${invoice.series}_${invoice.number}.pdf`;
+      link.download = `${customName}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Failed to generate PDF:', error);
-      alert('Failed to generate PDF. Please try again.');
+      console.error('Failed to download PDF:', error);
+      alert('Failed to download PDF. Please try again.');
     } finally {
+      setPendingDownload(null);
       setDownloadingInvoiceId(null);
     }
+  };
+
+  const handleCancelDownload = () => {
+    setPendingDownload(null);
+    setDownloadingInvoiceId(null);
   };
 
   const handleCreateCreditNote = (e: React.MouseEvent, invoice: Invoice) => {
@@ -318,7 +339,7 @@ export default function InvoicesPage() {
                       <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                         <div className="flex items-center justify-center space-x-2">
                           <button
-                            onClick={(e) => handleDownloadPdf(e, invoice)}
+                            onClick={(e) => handleDownloadPdfClick(e, invoice)}
                             disabled={downloadingInvoiceId === invoice.id}
                             className="inline-flex items-center px-3 py-1 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                             title={tInvoice('downloadPdf')}
@@ -435,7 +456,7 @@ export default function InvoicesPage() {
 
                   <div className="space-y-2">
                     <button
-                      onClick={(e) => handleDownloadPdf(e, invoice)}
+                      onClick={(e) => handleDownloadPdfClick(e, invoice)}
                       disabled={downloadingInvoiceId === invoice.id}
                       className="w-full inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[44px]"
                     >
@@ -617,7 +638,7 @@ export default function InvoicesPage() {
                       <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                         <div className="flex items-center justify-center space-x-2">
                           <button
-                            onClick={(e) => handleDownloadPdf(e, creditNote)}
+                            onClick={(e) => handleDownloadPdfClick(e, creditNote)}
                             disabled={downloadingInvoiceId === creditNote.id}
                             className="inline-flex items-center px-3 py-1 text-sm text-white bg-purple-600 hover:bg-purple-700 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                             title={tInvoice('downloadPdf')}
@@ -717,7 +738,7 @@ export default function InvoicesPage() {
 
                   <div className="mt-3 space-y-2">
                     <button
-                      onClick={(e) => handleDownloadPdf(e, creditNote)}
+                      onClick={(e) => handleDownloadPdfClick(e, creditNote)}
                       disabled={downloadingInvoiceId === creditNote.id}
                       className="w-full inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[44px]"
                     >
@@ -839,6 +860,17 @@ export default function InvoicesPage() {
           onCreditNoteCreated={handleCreditNoteCreated}
         />
       )}
+
+      {/* Download Name Dialog */}
+      <DownloadInvoiceNameDialog
+        isOpen={showDownloadNameDialog}
+        onClose={() => {
+          setShowDownloadNameDialog(false);
+          handleCancelDownload();
+        }}
+        onConfirm={handleConfirmDownload}
+        defaultName={pendingDownload ? `Invoice_${pendingDownload.invoice.series}_${pendingDownload.invoice.number}` : 'Invoice'}
+      />
 
       <ToastContainer toasts={toasts} removeToast={removeToast} />
     </div>

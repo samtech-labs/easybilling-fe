@@ -4,6 +4,7 @@ import { Invoice, AnafSubmissionStatus } from '@/types/invoice';
 import { useGenerateInvoicePdf, useSendEfactura, useGetAnafSubmissionStatus, useDownloadAnafResponse } from '@/hooks/useInvoices';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
+import DownloadInvoiceNameDialog from './DownloadInvoiceNameDialog';
 
 interface InvoiceDetailsModalProps {
   isOpen: boolean;
@@ -21,29 +22,49 @@ export default function InvoiceDetailsModal({ isOpen, onClose, invoice }: Invoic
   const [isDownloading, setIsDownloading] = useState(false);
   const [isDownloadingAnafResponse, setIsDownloadingAnafResponse] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
+  const [showDownloadNameDialog, setShowDownloadNameDialog] = useState(false);
+  const [pendingPdfBlob, setPendingPdfBlob] = useState<Blob | null>(null);
 
-  const handleDownloadPdf = async () => {
+  const handleDownloadPdfClick = async () => {
     if (!invoice) return;
 
     setIsDownloading(true);
     try {
       const pdfBlob = await generatePdfMutation.mutateAsync(invoice.id);
+      setPendingPdfBlob(pdfBlob);
+      setShowDownloadNameDialog(true);
+    } catch (error) {
+      console.error('Failed to generate PDF:', error);
+      alert(tInvoice('invoiceCreatedError'));
+      setIsDownloading(false);
+    }
+  };
 
+  const handleConfirmDownload = (customName: string) => {
+    if (!pendingPdfBlob || !invoice) return;
+
+    try {
       // Create a download link
-      const url = window.URL.createObjectURL(pdfBlob);
+      const url = window.URL.createObjectURL(pendingPdfBlob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `Invoice_${invoice.series}_${invoice.number}.pdf`;
+      link.download = `${customName}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Failed to generate PDF:', error);
+      console.error('Failed to download PDF:', error);
       alert(tInvoice('invoiceCreatedError'));
     } finally {
+      setPendingPdfBlob(null);
       setIsDownloading(false);
     }
+  };
+
+  const handleCancelDownload = () => {
+    setPendingPdfBlob(null);
+    setIsDownloading(false);
   };
 
   const handleSendEfactura = async () => {
@@ -374,7 +395,7 @@ export default function InvoiceDetailsModal({ isOpen, onClose, invoice }: Invoic
             {submissionButton.content}
           </button>
           <button
-            onClick={handleDownloadPdf}
+            onClick={handleDownloadPdfClick}
             disabled={isDownloading}
             className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[44px]"
           >
@@ -458,6 +479,17 @@ export default function InvoiceDetailsModal({ isOpen, onClose, invoice }: Invoic
           </div>
         </div>
       )}
+
+      {/* Download Name Dialog */}
+      <DownloadInvoiceNameDialog
+        isOpen={showDownloadNameDialog}
+        onClose={() => {
+          setShowDownloadNameDialog(false);
+          handleCancelDownload();
+        }}
+        onConfirm={handleConfirmDownload}
+        defaultName={invoice ? `Invoice_${invoice.series}_${invoice.number}` : 'Invoice'}
+      />
     </div>
   );
 }
