@@ -46,6 +46,7 @@ export default function CreateCreditNoteModal({
       // If no lines, add a default empty line
       if (copiedLines.length === 0) {
         copiedLines.push({
+          id: undefined,
           description: '',
           quantity: 1,
           unitPrice: 0,

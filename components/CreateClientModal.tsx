@@ -86,15 +86,15 @@ export default function CreateClientModal({
     }
 
     // Check if this is an international client (non-RO)
-    const isInternationalClient = formData.country.trim() &&
+    const isInternationalClient = formData.country?.trim() &&
       !formData.country.match(/^(RO|Romania|românia)$/i);
 
     if (isInternationalClient) {
-      if (!formData.address.trim()) {
+      if (!formData.address?.trim()) {
         setErrorMessage(tClient('addressRequiredForInternational'));
         return;
       }
-      if (!formData.country.trim()) {
+      if (!formData.country?.trim()) {
         setErrorMessage(tClient('countryRequiredForInternational'));
         return;
       }

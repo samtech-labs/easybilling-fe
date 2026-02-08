@@ -872,7 +872,7 @@ export default function InvoicesPage() {
         defaultName={pendingDownload ? `Invoice_${pendingDownload.invoice.series}_${pendingDownload.invoice.number}` : 'Invoice'}
       />
 
-      <ToastContainer toasts={toasts} removeToast={removeToast} />
+      <ToastContainer toasts={toasts} onClose={removeToast} />
     </div>
   );
 }
