@@ -85,6 +85,21 @@ export default function CreateClientModal({
       return;
     }
 
+    // Check if this is an international client (non-RO)
+    const isInternationalClient = formData.country.trim() &&
+      !formData.country.match(/^(RO|Romania|românia)$/i);
+
+    if (isInternationalClient) {
+      if (!formData.address.trim()) {
+        setErrorMessage(tClient('addressRequiredForInternational'));
+        return;
+      }
+      if (!formData.country.trim()) {
+        setErrorMessage(tClient('countryRequiredForInternational'));
+        return;
+      }
+    }
+
     try {
       await createClientMutation.mutateAsync(formData);
       setSuccessMessage(tClient('clientCreatedSuccess'));
@@ -203,6 +218,9 @@ export default function CreateClientModal({
           <div>
             <label htmlFor="address" className="block text-sm font-medium text-gray-700">
               {tCompany('address')}
+              {formData.country && !formData.country.match(/^(RO|Romania|românia)$/i) && (
+                <span className="text-red-500"> *</span>
+              )}
             </label>
             <input
               type="text"
@@ -261,36 +279,9 @@ export default function CreateClientModal({
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
               placeholder={tClient('enterCountry')}
             />
-          </div>
-
-          {/* City */}
-          <div>
-            <label htmlFor="city" className="block text-sm font-medium text-gray-700">
-              City
-            </label>
-            <input
-              type="text"
-              name="city"
-              id="city"
-              value={formData.city}
-              onChange={handleInputChange}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            />
-          </div>
-
-          {/* Country */}
-          <div>
-            <label htmlFor="country" className="block text-sm font-medium text-gray-700">
-              Country
-            </label>
-            <input
-              type="text"
-              name="country"
-              id="country"
-              value={formData.country}
-              onChange={handleInputChange}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            />
+            <p className="mt-1 text-xs text-gray-500">
+              {tClient('countryHint')}
+            </p>
           </div>
 
           {/* Registration Number */}

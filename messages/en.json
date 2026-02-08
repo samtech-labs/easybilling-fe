@@ -69,7 +69,10 @@
     "clientCreatedError": "Failed to create client. Please try again.",
     "existingClient": "Existing Client",
     "customClientDetails": "Custom Client Details",
-    "selectCompanyFirst": "Select a company first"
+    "selectCompanyFirst": "Select a company first",
+    "addressRequiredForInternational": "Address is required for international clients.",
+    "countryRequiredForInternational": "Country is required for international clients.",
+    "countryHint": "Leave empty or enter 'RO'/'Romania' to use ANAF lookup for Romanian clients"
   },
   "invoice": {
     "createInvoice": "Create New Invoice",

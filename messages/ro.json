@@ -123,7 +123,10 @@
     "cuiRequired": "Vă rugăm introduceți un CUI înainte de a prelua datele ANAF",
     "nameAndCuiRequired": "Numele și CUI-ul sunt obligatorii",
     "fetchedFromAnafSuccess": "Datele clientului au fost preluate cu succes din ANAF",
-    "fetchedFromAnafError": "Eroare la preluarea datelor clientului din ANAF"
+    "fetchedFromAnafError": "Eroare la preluarea datelor clientului din ANAF",
+    "addressRequiredForInternational": "Adresa este obligatorie pentru clienții internaționali.",
+    "countryRequiredForInternational": "Țara este obligatorie pentru clienții internaționali.",
+    "countryHint": "Lăsați gol sau introduceți 'RO'/'Romania' pentru a folosi ANAF pentru clienți români"
   },
   "invoice": {
     "createInvoice": "Creează Factură Nouă",
