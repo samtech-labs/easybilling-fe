@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useGetInvoices, useGetCreditNotes, useGenerateInvoicePdf } from '@/hooks/useInvoices';
@@ -15,7 +15,7 @@ import CreateInvoiceModal from '@/components/CreateInvoiceModal';
 import CreateCreditNoteModal from '@/components/CreateCreditNoteModal';
 import DownloadInvoiceNameDialog from '@/components/DownloadInvoiceNameDialog';
 
-export default function InvoicesPage() {
+function InvoicesContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const companyId = searchParams.get('companyId') || '';
@@ -874,5 +874,13 @@ export default function InvoicesPage() {
 
       <ToastContainer toasts={toasts} onClose={removeToast} />
     </div>
+  );
+}
+
+export default function InvoicesPage() {
+  return (
+    <Suspense fallback={<div className="flex justify-center items-center min-h-screen">Loading...</div>}>
+      <InvoicesContent />
+    </Suspense>
   );
 }

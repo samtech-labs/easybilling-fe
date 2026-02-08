@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import {
@@ -16,7 +16,7 @@ import CreateCompanyForUserModal from '@/components/CreateCompanyForUserModal';
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 import { Building2, CreditCard, Plus, Trash2, ArrowLeft } from 'lucide-react';
 
-export default function UserConfigPage() {
+function UserConfigContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const userId = searchParams.get('userId') || '';
@@ -373,5 +373,13 @@ export default function UserConfigPage() {
         />
       )}
     </div>
+  );
+}
+
+export default function UserConfigPage() {
+  return (
+    <Suspense fallback={<div className="flex justify-center items-center min-h-screen">Loading...</div>}>
+      <UserConfigContent />
+    </Suspense>
   );
 }
