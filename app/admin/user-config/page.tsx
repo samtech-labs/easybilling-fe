@@ -355,7 +355,7 @@ export default function UserConfigPage() {
           onConfirm={handleConfirmDeleteMembership}
           title={tCommon('delete')}
           message={tAdmin('confirmDeleteMembershipType')}
-          isLoading={deleteMembershipMutation.isPending}
+          isDeleting={deleteMembershipMutation.isPending}
         />
       )}
 
@@ -369,7 +369,7 @@ export default function UserConfigPage() {
           onConfirm={handleConfirmDeleteCompany}
           title={tCommon('delete')}
           message={tCompany('confirmDeleteCompany')}
-          isLoading={deleteCompanyMutation.isPending}
+          isDeleting={deleteCompanyMutation.isPending}
         />
       )}
     </div>
