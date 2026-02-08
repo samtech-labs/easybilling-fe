@@ -537,7 +537,7 @@ export default function AdminConfigPage() {
           onConfirm={handleConfirmDelete}
           title={tAdmin('deleteUser')}
           message={tAdmin('confirmDeleteUser')}
-          isLoading={deleteUserMutation.isPending}
+          isDeleting={deleteUserMutation.isPending}
         />
       )}
 
@@ -556,7 +556,7 @@ export default function AdminConfigPage() {
           onConfirm={handleConfirmDeleteMembershipType}
           title={tAdmin('deleteMembershipType')}
           message={tAdmin('confirmDeleteMembershipType')}
-          isLoading={deleteMembershipTypeMutation.isPending}
+          isDeleting={deleteMembershipTypeMutation.isPending}
         />
       )}
     </div>
