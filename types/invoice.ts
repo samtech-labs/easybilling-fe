@@ -16,6 +16,20 @@ export enum InvoiceType {
   CreditNote = 381,
 }
 
+export enum Currency {
+  RON = 0,
+  EUR = 1,
+}
+
+export const CurrencyLabel: Record<Currency, string> = {
+  [Currency.RON]: 'RON',
+  [Currency.EUR]: 'EUR',
+};
+
+export function getCurrencyLabel(currency?: Currency): string {
+  return CurrencyLabel[currency ?? Currency.RON];
+}
+
 export interface Invoice {
   id: string;
   date: string;
@@ -26,6 +40,7 @@ export interface Invoice {
   totalVat: number;
   grandTotal: number;
   type?: InvoiceType;
+  currency?: Currency;
   originalInvoiceId?: string;
   originalInvoiceNumber?: string;
   company: {
@@ -53,6 +68,7 @@ export interface LastInvoiceNumber {
 }
 
 export interface CreateInvoiceRequest {
+  currency?: Currency;
   companyId: string;
   clientId?: string;
   clientDetails?: {

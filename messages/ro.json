@@ -176,6 +176,7 @@
     "notesPlaceholder": "Notițe adiționale sau instrucțiuni de plată...",
     "createInvoiceButton": "Creează Factură",
     "creating": "Se creează...",
+    "currency": "Moneda",
     "loadingInvoices": "Se încarcă facturile...",
     "errorLoadingInvoices": "Eroare la încărcarea facturilor. Vă rugăm încercați din nou.",
     "noInvoicesFound": "Nicio factură găsită pentru această companie.",
