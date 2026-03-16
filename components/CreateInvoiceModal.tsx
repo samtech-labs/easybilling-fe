@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import { useCreateInvoice, useGetLastInvoiceNumber } from '@/hooks/useInvoices';
 import { useGetCompanies } from '@/hooks/useCompanies';
 import { useGetClients } from '@/hooks/useClients';
-import { CreateInvoiceRequest, InvoiceLine, Invoice } from '@/types/invoice';
+import { CreateInvoiceRequest, InvoiceLine, Invoice, Currency, getCurrencyLabel } from '@/types/invoice';
 
 interface CreateInvoiceModalProps {
   isOpen: boolean;
@@ -36,6 +36,7 @@ export default function CreateInvoiceModal({
     iban: '',
     bank: '',
   });
+  const [currency, setCurrency] = useState<Currency>(Currency.RON);
   const [series, setSeries] = useState<string>('A');
   const [number, setNumber] = useState<number>(1);
   const [issueDate, setIssueDate] = useState<string>(
@@ -142,6 +143,7 @@ export default function CreateInvoiceModal({
     }
 
     const requestData: CreateInvoiceRequest = {
+      currency,
       companyId: selectedCompanyId,
       series,
       number,
@@ -200,6 +202,7 @@ export default function CreateInvoiceModal({
       iban: '',
       bank: '',
     });
+    setCurrency(Currency.RON);
     setSeries('A');
     setNumber(1);
     setIssueDate(new Date().toISOString().split('T')[0]);
@@ -283,8 +286,8 @@ export default function CreateInvoiceModal({
             </div>
           </div>
 
-          {/* Invoice Series and Number */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Invoice Series, Number and Currency */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label
                 htmlFor="series"
@@ -317,6 +320,23 @@ export default function CreateInvoiceModal({
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                 required
               />
+            </div>
+            <div>
+              <label
+                htmlFor="currency"
+                className="block text-sm font-medium text-gray-700"
+              >
+                {tInvoice('currency')} <span className="text-red-500">*</span>
+              </label>
+              <select
+                id="currency"
+                value={currency}
+                onChange={(e) => setCurrency(Number(e.target.value) as Currency)}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              >
+                <option value={Currency.RON}>RON</option>
+                <option value={Currency.EUR}>EUR</option>
+              </select>
             </div>
           </div>
 
@@ -674,19 +694,19 @@ export default function CreateInvoiceModal({
                   <div className="flex justify-between text-sm">
                     <span className="font-medium text-gray-700">{tInvoice('subtotal')}:</span>
                     <span className="text-gray-900">
-                      {calculateSubtotal().toFixed(2)} RON
+                      {calculateSubtotal().toFixed(2)} {getCurrencyLabel(currency)}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="font-medium text-gray-700">{tInvoice('totalVat')}:</span>
                     <span className="text-gray-900">
-                      {calculateTotalVat().toFixed(2)} RON
+                      {calculateTotalVat().toFixed(2)} {getCurrencyLabel(currency)}
                     </span>
                   </div>
                   <div className="flex justify-between text-lg font-bold pt-2 border-t mt-2">
                     <span className="text-gray-900">{tInvoice('total')}:</span>
                     <span className="text-indigo-600">
-                      {calculateTotal().toFixed(2)} RON
+                      {calculateTotal().toFixed(2)} {getCurrencyLabel(currency)}
                     </span>
                   </div>
                 </div>

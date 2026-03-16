@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import { useGetInvoices, useGetCreditNotes, useGenerateInvoicePdf } from '@/hooks/useInvoices';
 import { useGetCompanies } from '@/hooks/useCompanies';
 import { useAuth } from '@/contexts/AuthContext';
-import { Invoice, InvoiceType } from '@/types/invoice';
+import { Invoice, InvoiceType, getCurrencyLabel } from '@/types/invoice';
 import { useToast } from '@/hooks/useToast';
 import ToastContainer from '@/components/ToastContainer';
 import AnafIntegration from '@/components/AnafIntegration';
@@ -328,13 +328,13 @@ function InvoicesContent() {
                         {formatDate(invoice.date)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
-                        {invoice.totalAmount.toFixed(2)} RON
+                        {invoice.totalAmount.toFixed(2)} {getCurrencyLabel(invoice.currency)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
-                        {invoice.totalVat.toFixed(2)} RON
+                        {invoice.totalVat.toFixed(2)} {getCurrencyLabel(invoice.currency)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900 text-right">
-                        {invoice.grandTotal.toFixed(2)} RON
+                        {invoice.grandTotal.toFixed(2)} {getCurrencyLabel(invoice.currency)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                         <div className="flex items-center justify-center space-x-2">
@@ -435,7 +435,7 @@ function InvoicesContent() {
                     </div>
                     <div className="text-right">
                       <p className="text-xs text-gray-500">{tInvoice('grandTotal')}</p>
-                      <p className="text-lg font-bold text-indigo-600">{invoice.grandTotal.toFixed(2)} RON</p>
+                      <p className="text-lg font-bold text-indigo-600">{invoice.grandTotal.toFixed(2)} {getCurrencyLabel(invoice.currency)}</p>
                     </div>
                   </div>
 
@@ -446,11 +446,11 @@ function InvoicesContent() {
                     </div>
                     <div className="text-right">
                       <p className="text-xs text-gray-500">{tInvoice('totalAmount')}</p>
-                      <p className="font-medium text-gray-900">{invoice.totalAmount.toFixed(2)} RON</p>
+                      <p className="font-medium text-gray-900">{invoice.totalAmount.toFixed(2)} {getCurrencyLabel(invoice.currency)}</p>
                     </div>
                     <div>
                       <p className="text-xs text-gray-500">{tInvoice('vat')}</p>
-                      <p className="font-medium text-gray-900">{invoice.totalVat.toFixed(2)} RON</p>
+                      <p className="font-medium text-gray-900">{invoice.totalVat.toFixed(2)} {getCurrencyLabel(invoice.currency)}</p>
                     </div>
                   </div>
 
@@ -627,13 +627,13 @@ function InvoicesContent() {
                         {formatDate(creditNote.date)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
-                        -{creditNote.totalAmount.toFixed(2)} RON
+                        -{creditNote.totalAmount.toFixed(2)} {getCurrencyLabel(creditNote.currency)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
-                        -{creditNote.totalVat.toFixed(2)} RON
+                        -{creditNote.totalVat.toFixed(2)} {getCurrencyLabel(creditNote.currency)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-purple-900 text-right">
-                        -{creditNote.grandTotal.toFixed(2)} RON
+                        -{creditNote.grandTotal.toFixed(2)} {getCurrencyLabel(creditNote.currency)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                         <div className="flex items-center justify-center space-x-2">

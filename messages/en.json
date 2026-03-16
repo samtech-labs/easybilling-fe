@@ -121,7 +121,8 @@
     "addAtLeastOneLine": "Please add at least one invoice line",
     "notesPlaceholder": "Additional notes or payment instructions...",
     "createInvoiceButton": "Create Invoice",
-    "creating": "Creating..."
+    "creating": "Creating...",
+    "currency": "Currency"
   },
   "validation": {
     "fieldRequired": "This field is required",
