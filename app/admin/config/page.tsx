@@ -17,7 +17,7 @@ import { Users, Plus, Edit2, Trash2, Building2, CreditCard, Award } from 'lucide
 
 export default function AdminConfigPage() {
   const router = useRouter();
-  const { isAuthenticated, logout, userRole } = useAuth();
+  const { isAuthenticated, isLoading: isAuthLoading, logout, userRole } = useAuth();
   const tAdmin = useTranslations('admin');
   const tCommon = useTranslations('common');
   const tErrors = useTranslations('errors');
@@ -91,15 +91,16 @@ export default function AdminConfigPage() {
   };
 
   useEffect(() => {
+    if (isAuthLoading) return;
     if (!isAuthenticated) {
       router.push('/login');
     } else if (userRole && userRole !== 'ADMIN') {
       // Redirect non-admin users to home page
       router.push('/');
     }
-  }, [isAuthenticated, userRole, router]);
+  }, [isAuthenticated, isAuthLoading, userRole, router]);
 
-  if (!isAuthenticated || (userRole && userRole !== 'ADMIN')) {
+  if (isAuthLoading || !isAuthenticated || (userRole && userRole !== 'ADMIN')) {
     return null;
   }
 

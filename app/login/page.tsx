@@ -9,7 +9,7 @@ import { useTranslations } from 'next-intl';
 export default function LoginPage() {
   const t = useTranslations('login');
   const router = useRouter();
-  const { isAuthenticated, setAuthToken } = useAuth();
+  const { isAuthenticated, isLoading: isAuthLoading, setAuthToken } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
@@ -31,10 +31,10 @@ export default function LoginPage() {
 
   // Redirect to companies if already authenticated
   useEffect(() => {
-    if (isAuthenticated) {
+    if (!isAuthLoading && isAuthenticated) {
       router.replace('/companies');
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, isAuthLoading, router]);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();

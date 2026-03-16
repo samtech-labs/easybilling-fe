@@ -11,7 +11,7 @@ interface I18nProviderProps {
 export default function I18nProvider({ children, initialMessages }: I18nProviderProps) {
   // Always use Romanian (default locale)
   return (
-    <NextIntlClientProvider locale={defaultLocale} messages={initialMessages}>
+    <NextIntlClientProvider locale={defaultLocale} messages={initialMessages} timeZone="Europe/Bucharest">
       {children}
     </NextIntlClientProvider>
   );

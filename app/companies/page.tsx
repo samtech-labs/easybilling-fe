@@ -13,7 +13,7 @@ import { Company } from '@/types/company';
 
 export default function CompaniesPage() {
   const router = useRouter();
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, isLoading: isAuthLoading, logout } = useAuth();
   const tCompany = useTranslations('company');
   const tCommon = useTranslations('common');
   const { data: companies, isLoading, error } = useGetCompanies();
@@ -54,12 +54,12 @@ export default function CompaniesPage() {
   };
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!isAuthLoading && !isAuthenticated) {
       router.push('/login');
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, isAuthLoading, router]);
 
-  if (!isAuthenticated) {
+  if (isAuthLoading || !isAuthenticated) {
     return null;
   }
 

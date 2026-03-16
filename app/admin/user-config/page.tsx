@@ -20,7 +20,7 @@ function UserConfigContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const userId = searchParams.get('userId') || '';
-  const { isAuthenticated, userRole } = useAuth();
+  const { isAuthenticated, isLoading: isAuthLoading, userRole } = useAuth();
   const tAdmin = useTranslations('admin');
   const tCommon = useTranslations('common');
   const tCompany = useTranslations('company');
@@ -39,6 +39,7 @@ function UserConfigContent() {
   const [companyToDelete, setCompanyToDelete] = useState<any>(null);
 
   useEffect(() => {
+    if (isAuthLoading) return;
     if (!isAuthenticated) {
       router.push('/login');
     } else if (userRole && userRole !== 'ADMIN') {
@@ -46,7 +47,7 @@ function UserConfigContent() {
     } else if (!userId) {
       router.push('/admin/config');
     }
-  }, [isAuthenticated, userRole, userId, router]);
+  }, [isAuthenticated, isAuthLoading, userRole, userId, router]);
 
   const handleDeleteMembershipClick = (membership: any) => {
     setMembershipToDelete(membership);
@@ -89,7 +90,7 @@ function UserConfigContent() {
     router.push('/admin/config');
   };
 
-  if (!isAuthenticated || (userRole && userRole !== 'ADMIN')) {
+  if (isAuthLoading || !isAuthenticated || (userRole && userRole !== 'ADMIN')) {
     return null;
   }
 

@@ -63,6 +63,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     login: async () => {}, // This will be handled by useLogin hook
     logout,
     isAuthenticated: !!token && !isLoading,
+    isLoading,
     setAuthToken,
     userRole,
   };

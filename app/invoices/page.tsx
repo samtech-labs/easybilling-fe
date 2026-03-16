@@ -20,7 +20,7 @@ function InvoicesContent() {
   const searchParams = useSearchParams();
   const companyId = searchParams.get('companyId') || '';
   const invoiceId = searchParams.get('invoiceId');
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, isLoading: isAuthLoading, logout } = useAuth();
   const tInvoice = useTranslations('invoice');
   const tAnaf = useTranslations('anaf');
   const tCommon = useTranslations('common');
@@ -116,10 +116,10 @@ function InvoicesContent() {
   };
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!isAuthLoading && !isAuthenticated) {
       router.push('/login');
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, isAuthLoading, router]);
 
   useEffect(() => {
     if (!companyId) {
@@ -142,7 +142,7 @@ function InvoicesContent() {
     }
   }, [invoiceId, invoices, creditNotes, isLoading, companyId, router]);
 
-  if (!isAuthenticated) {
+  if (isAuthLoading || !isAuthenticated) {
     return null;
   }
 
