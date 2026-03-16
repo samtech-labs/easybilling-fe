@@ -20,8 +20,8 @@ export default function Navbar() {
     router.push('/login');
   };
 
-  // Don't show navbar on login/register pages
-  if (pathname === '/login' || pathname === '/register') {
+  // Don't show navbar on landing, login, or register pages
+  if (pathname === '/' || pathname === '/login' || pathname === '/register') {
     return null;
   }
 
