@@ -42,22 +42,34 @@ export default function AnafIntegration({ onSuccess, onError }: AnafIntegrationP
   }, [refetch, onSuccess, onError, tAnaf]);
 
   const handleRegisterClick = async () => {
+    // Open popup immediately on user click (synchronous) to avoid browser popup blockers.
+    // Browsers block window.open() calls that happen after an async await.
+    const width = 600;
+    const height = 700;
+    const left = window.screen.width / 2 - width / 2;
+    const top = window.screen.height / 2 - height / 2;
+
+    const popup = window.open(
+      'about:blank',
+      'anaf-auth',
+      `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no,scrollbars=yes,resizable=yes`
+    );
+
     try {
       setIsAuthenticating(true);
       const response = await getAuthUrlMutation.mutateAsync();
 
-      // Open the ANAF auth URL in a new window
-      const width = 600;
-      const height = 700;
-      const left = window.screen.width / 2 - width / 2;
-      const top = window.screen.height / 2 - height / 2;
-
-      window.open(
-        response.authUrl,
-        'anaf-auth',
-        `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no,scrollbars=yes,resizable=yes`
-      );
+      if (popup && !popup.closed) {
+        popup.location.href = response.authUrl;
+      } else {
+        // Popup was blocked despite our efforts — fall back to same-window redirect
+        window.location.href = response.authUrl;
+      }
     } catch (error: any) {
+      // Close the blank popup on error
+      if (popup && !popup.closed) {
+        popup.close();
+      }
       setIsAuthenticating(false);
       const errorMessage = error.response?.data?.message || tAnaf('authorizationFailed');
       onError?.(errorMessage);

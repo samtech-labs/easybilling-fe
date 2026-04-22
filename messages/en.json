@@ -102,6 +102,7 @@
     "removeLine": "Remove",
     "notes": "Notes",
     "downloadPdf": "Download PDF",
+    "downloadXml": "Download XML",
     "generatingPdf": "Generating PDF...",
     "sendEfactura": "Send EFactura",
     "sending": "Sending...",

@@ -98,6 +98,20 @@ export const useGenerateInvoicePdf = () => {
   });
 };
 
+export const useDownloadInvoiceXml = () => {
+  return useMutation({
+    mutationFn: async (invoiceId: string): Promise<Blob> => {
+      const response = await apiClient.get(
+        `/invoice/DownloadXml?invoiceId=${invoiceId}`,
+        {
+          responseType: 'blob',
+        }
+      );
+      return response.data;
+    },
+  });
+};
+
 export const useSendEfactura = () => {
   const queryClient = useQueryClient();
 

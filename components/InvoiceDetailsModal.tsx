@@ -1,7 +1,7 @@
 'use client';
 
 import { Invoice, AnafSubmissionStatus } from '@/types/invoice';
-import { useGenerateInvoicePdf, useSendEfactura, useGetAnafSubmissionStatus, useDownloadAnafResponse } from '@/hooks/useInvoices';
+import { useGenerateInvoicePdf, useDownloadInvoiceXml, useSendEfactura, useGetAnafSubmissionStatus, useDownloadAnafResponse } from '@/hooks/useInvoices';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import DownloadInvoiceNameDialog from './DownloadInvoiceNameDialog';
@@ -19,11 +19,35 @@ export default function InvoiceDetailsModal({ isOpen, onClose, invoice }: Invoic
   const sendEfacturaMutation = useSendEfactura();
   const downloadAnafResponseMutation = useDownloadAnafResponse();
   const { data: anafStatus } = useGetAnafSubmissionStatus(invoice?.id || null);
+  const downloadXmlMutation = useDownloadInvoiceXml();
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isDownloadingXml, setIsDownloadingXml] = useState(false);
   const [isDownloadingAnafResponse, setIsDownloadingAnafResponse] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [showDownloadNameDialog, setShowDownloadNameDialog] = useState(false);
   const [pendingPdfBlob, setPendingPdfBlob] = useState<Blob | null>(null);
+
+  const handleDownloadXmlClick = async () => {
+    if (!invoice) return;
+
+    setIsDownloadingXml(true);
+    try {
+      const xmlBlob = await downloadXmlMutation.mutateAsync(invoice.id);
+      const url = window.URL.createObjectURL(xmlBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${invoice.series}_${invoice.number}.xml`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Failed to download XML:', error);
+      alert(tInvoice('invoiceCreatedError'));
+    } finally {
+      setIsDownloadingXml(false);
+    }
+  };
 
   const handleDownloadPdfClick = async () => {
     if (!invoice) return;
@@ -439,6 +463,33 @@ export default function InvoiceDetailsModal({ isOpen, onClose, invoice }: Invoic
                   />
                 </svg>
                 {tInvoice('downloadPdf')}
+              </>
+            )}
+          </button>
+          <button
+            onClick={handleDownloadXmlClick}
+            disabled={isDownloadingXml}
+            className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-h-[44px]"
+          >
+            {isDownloadingXml ? (
+              <>
+                <svg
+                  className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                {tInvoice('downloading')}
+              </>
+            ) : (
+              <>
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                </svg>
+                {tInvoice('downloadXml')}
               </>
             )}
           </button>
