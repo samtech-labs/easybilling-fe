@@ -3,7 +3,7 @@
 import { useState, FormEvent, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useCreateCreditNote } from '@/hooks/useInvoices';
-import { Invoice, InvoiceLine, CreateCreditNoteRequest } from '@/types/invoice';
+import { Invoice, InvoiceLine, CreateCreditNoteRequest, UNIT_OPTIONS, DEFAULT_UNIT } from '@/types/invoice';
 
 interface CreateCreditNoteModalProps {
   isOpen: boolean;
@@ -40,7 +40,7 @@ export default function CreateCreditNoteModal({
         unitPrice: line.unitPrice,
         vat: line.vatRate || line.vat || 0,
         vatRate: line.vatRate || line.vat || 0,
-        unit: line.unit || 'buc',
+        unit: line.unit || DEFAULT_UNIT,
       }));
 
       // If no lines, add a default empty line
@@ -52,7 +52,7 @@ export default function CreateCreditNoteModal({
           unitPrice: 0,
           vat: 19,
           vatRate: 19,
-          unit: 'buc'
+          unit: DEFAULT_UNIT,
         });
       }
 
@@ -71,7 +71,7 @@ export default function CreateCreditNoteModal({
   const handleAddLine = () => {
     setCreditNoteLines([
       ...creditNoteLines,
-      { description: '', quantity: 1, unitPrice: 0, vat: 19, vatRate: 19, unit: 'buc' },
+      { description: '', quantity: 1, unitPrice: 0, vat: 19, vatRate: 19, unit: DEFAULT_UNIT },
     ]);
   };
 
@@ -155,7 +155,7 @@ export default function CreateCreditNoteModal({
         unitPrice: line.unitPrice,
         vatRate: line.vatRate || line.vat || 0,
         vat: line.vatRate || line.vat || 0,
-        unit: line.unit || 'buc',
+        unit: line.unit || DEFAULT_UNIT,
       })),
     };
 
@@ -319,6 +319,9 @@ export default function CreateCreditNoteModal({
                     <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
                       {tInvoice('quantity')}
                     </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
+                      {tInvoice('unit')}
+                    </th>
                     <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
                       {tInvoice('unitPrice')}
                     </th>
@@ -355,6 +358,23 @@ export default function CreateCreditNoteModal({
                           step="0.01"
                           required
                         />
+                      </td>
+                      <td className="px-4 py-3">
+                        <input
+                          type="text"
+                          list={`cn-unit-options-${index}`}
+                          maxLength={20}
+                          value={line.unit ?? DEFAULT_UNIT}
+                          onChange={(e) => handleLineChange(index, 'unit', e.target.value)}
+                          className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-500"
+                        />
+                        <datalist id={`cn-unit-options-${index}`}>
+                          {UNIT_OPTIONS.map((opt) => (
+                            <option key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </option>
+                          ))}
+                        </datalist>
                       </td>
                       <td className="px-4 py-3">
                         <input
@@ -427,6 +447,26 @@ export default function CreateCreditNoteModal({
                         />
                       </div>
                       <div>
+                        <label className="block text-xs text-gray-500 mb-1">{tInvoice('unit')}</label>
+                        <input
+                          type="text"
+                          list={`cn-unit-options-mobile-${index}`}
+                          maxLength={20}
+                          value={line.unit ?? DEFAULT_UNIT}
+                          onChange={(e) => handleLineChange(index, 'unit', e.target.value)}
+                          className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-purple-500"
+                        />
+                        <datalist id={`cn-unit-options-mobile-${index}`}>
+                          {UNIT_OPTIONS.map((opt) => (
+                            <option key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </option>
+                          ))}
+                        </datalist>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
                         <label className="block text-xs text-gray-500 mb-1">{tInvoice('unitPrice')}</label>
                         <input
                           type="number"
@@ -437,8 +477,6 @@ export default function CreateCreditNoteModal({
                           required
                         />
                       </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
                       <div>
                         <label className="block text-xs text-gray-500 mb-1">{tInvoice('vat')} (%)</label>
                         <input
@@ -450,11 +488,11 @@ export default function CreateCreditNoteModal({
                           required
                         />
                       </div>
-                      <div>
-                        <label className="block text-xs text-gray-500 mb-1">{tInvoice('total')}</label>
-                        <div className="px-2 py-1 text-sm font-medium text-gray-900 bg-white rounded border border-gray-200">
-                          {calculateLineTotal(line).toFixed(2)} RON
-                        </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">{tInvoice('total')}</label>
+                      <div className="px-2 py-1 text-sm font-medium text-gray-900 bg-white rounded border border-gray-200">
+                        {calculateLineTotal(line).toFixed(2)} RON
                       </div>
                     </div>
                     {creditNoteLines.length > 1 && (

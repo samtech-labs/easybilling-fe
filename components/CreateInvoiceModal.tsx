@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import { useCreateInvoice, useGetLastInvoiceNumber } from '@/hooks/useInvoices';
 import { useGetCompanies } from '@/hooks/useCompanies';
 import { useGetClients } from '@/hooks/useClients';
-import { CreateInvoiceRequest, InvoiceLine, Invoice, Currency, getCurrencyLabel } from '@/types/invoice';
+import { CreateInvoiceRequest, InvoiceLine, Invoice, Currency, getCurrencyLabel, UNIT_OPTIONS, DEFAULT_UNIT } from '@/types/invoice';
 
 interface CreateInvoiceModalProps {
   isOpen: boolean;
@@ -46,7 +46,7 @@ export default function CreateInvoiceModal({
     new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
   );
   const [invoiceLines, setInvoiceLines] = useState<InvoiceLine[]>([
-    { description: '', quantity: 1, unitPrice: 0, totalPrice: 0, vat: 19 },
+    { description: '', quantity: 1, unitPrice: 0, totalPrice: 0, vat: 19, unit: DEFAULT_UNIT },
   ]);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
@@ -59,7 +59,7 @@ export default function CreateInvoiceModal({
   const handleAddLine = () => {
     setInvoiceLines([
       ...invoiceLines,
-      { description: '', quantity: 1, unitPrice: 0, totalPrice: 0, vat: 19 },
+      { description: '', quantity: 1, unitPrice: 0, totalPrice: 0, vat: 19, unit: DEFAULT_UNIT },
     ]);
   };
 
@@ -155,6 +155,7 @@ export default function CreateInvoiceModal({
         unitPrice: line.unitPrice,
         totalPrice: line.totalPrice,
         vat: line.vat,
+        unit: line.unit || DEFAULT_UNIT,
       })),
     };
 
@@ -210,7 +211,7 @@ export default function CreateInvoiceModal({
       new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
     );
     setInvoiceLines([
-      { description: '', quantity: 1, unitPrice: 0, totalPrice: 0, vat: 19 },
+      { description: '', quantity: 1, unitPrice: 0, totalPrice: 0, vat: 19, unit: DEFAULT_UNIT },
     ]);
     setErrorMessage('');
     setSuccessMessage('');
@@ -566,7 +567,7 @@ export default function CreateInvoiceModal({
                 >
                   {/* Mobile: Stack all fields vertically */}
                   <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-2 sm:items-end">
-                    <div className="sm:col-span-4">
+                    <div className="sm:col-span-3">
                       <label className="block text-xs font-medium text-gray-700 mb-1">
                         {tInvoice('description')} <span className="text-red-500">*</span>
                       </label>
@@ -581,7 +582,7 @@ export default function CreateInvoiceModal({
                       />
                     </div>
 
-                    {/* Mobile: 2-column grid for quantity and unit price */}
+                    {/* Mobile: 2-column grid for quantity and unit */}
                     <div className="grid grid-cols-2 gap-2 sm:contents">
                       <div className="sm:col-span-2">
                         <label className="block text-xs font-medium text-gray-700 mb-1">
@@ -602,6 +603,32 @@ export default function CreateInvoiceModal({
                           className="block w-full px-2 py-2 text-sm border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                         />
                       </div>
+                      <div className="sm:col-span-1">
+                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                          {tInvoice('unit')}
+                        </label>
+                        <input
+                          type="text"
+                          list={`unit-options-${index}`}
+                          maxLength={20}
+                          value={line.unit ?? DEFAULT_UNIT}
+                          onChange={(e) =>
+                            handleLineChange(index, 'unit', e.target.value)
+                          }
+                          className="block w-full px-2 py-2 text-sm border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                        />
+                        <datalist id={`unit-options-${index}`}>
+                          {UNIT_OPTIONS.map((opt) => (
+                            <option key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </option>
+                          ))}
+                        </datalist>
+                      </div>
+                    </div>
+
+                    {/* Mobile: 2-column grid for unit price and VAT */}
+                    <div className="grid grid-cols-2 gap-2 sm:contents">
                       <div className="sm:col-span-2">
                         <label className="block text-xs font-medium text-gray-700 mb-1">
                           {tInvoice('unitPrice')}
@@ -621,10 +648,6 @@ export default function CreateInvoiceModal({
                           className="block w-full px-2 py-2 text-sm border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                         />
                       </div>
-                    </div>
-
-                    {/* Mobile: 2-column grid for VAT and total */}
-                    <div className="grid grid-cols-2 gap-2 sm:contents">
                       <div className="sm:col-span-1">
                         <label className="block text-xs font-medium text-gray-700 mb-1">
                           {tInvoice('vat')} %
@@ -644,17 +667,19 @@ export default function CreateInvoiceModal({
                           className="block w-full px-2 py-2 text-sm border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                         />
                       </div>
-                      <div className="sm:col-span-2">
-                        <label className="block text-xs font-medium text-gray-700 mb-1">
-                          {tInvoice('total')}
-                        </label>
-                        <input
-                          type="text"
-                          value={(line.totalPrice || line.lineTotal || 0).toFixed(2)}
-                          readOnly
-                          className="block w-full px-2 py-2 text-sm border border-gray-300 rounded-md bg-gray-50"
-                        />
-                      </div>
+                    </div>
+
+                    {/* Total - full width on mobile */}
+                    <div className="sm:col-span-2">
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
+                        {tInvoice('total')}
+                      </label>
+                      <input
+                        type="text"
+                        value={(line.totalPrice || line.lineTotal || 0).toFixed(2)}
+                        readOnly
+                        className="block w-full px-2 py-2 text-sm border border-gray-300 rounded-md bg-gray-50"
+                      />
                     </div>
 
                     {/* Remove button - full width on mobile */}

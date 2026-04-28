@@ -146,6 +146,7 @@
     "items": "Articole",
     "description": "Descriere",
     "quantity": "Cantitate",
+    "unit": "Unitate",
     "unitPrice": "Preț Unitar",
     "vat": "TVA",
     "total": "Total",

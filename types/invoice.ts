@@ -11,6 +11,21 @@ export interface InvoiceLine {
   lineTotalWithVat?: number; // Backend calculated property
 }
 
+export const DEFAULT_UNIT = 'buc';
+
+export const UNIT_OPTIONS = [
+  { value: 'buc', label: 'buc (bucăți)' },
+  { value: 'ore', label: 'ore (ore)' },
+  { value: 'zile', label: 'zile (zile)' },
+  { value: 'luni', label: 'luni (luni)' },
+  { value: 'kg', label: 'kg (kilograme)' },
+  { value: 'm', label: 'm (metri)' },
+  { value: 'mp', label: 'mp (metri pătrați)' },
+  { value: 'l', label: 'l (litri)' },
+  { value: 'elem', label: 'elem (elemente)' },
+  { value: 'set', label: 'set (seturi)' },
+] as const;
+
 export enum InvoiceType {
   Invoice = 380,
   CreditNote = 381,

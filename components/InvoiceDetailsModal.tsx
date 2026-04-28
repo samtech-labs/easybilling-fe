@@ -314,7 +314,9 @@ export default function InvoiceDetailsModal({ isOpen, onClose, invoice }: Invoic
                 {invoice.invoiceLines.map((line, index) => (
                   <tr key={line.id || index}>
                     <td className="px-4 py-3 text-sm text-gray-900">{line.description}</td>
-                    <td className="px-4 py-3 text-sm text-gray-900 text-right">{line.quantity}</td>
+                    <td className="px-4 py-3 text-sm text-gray-900 text-right">
+                      {line.quantity} {line.unit || 'buc'}
+                    </td>
                     <td className="px-4 py-3 text-sm text-gray-900 text-right">
                       {line.unitPrice.toFixed(2)} RON
                     </td>
@@ -336,7 +338,7 @@ export default function InvoiceDetailsModal({ isOpen, onClose, invoice }: Invoic
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div>
                     <span className="text-gray-500">{tInvoice('quantity')}:</span>
-                    <span className="ml-1 text-gray-900">{line.quantity}</span>
+                    <span className="ml-1 text-gray-900">{line.quantity} {line.unit || 'buc'}</span>
                   </div>
                   <div className="text-right">
                     <span className="text-gray-500">{tInvoice('unitPrice')}:</span>

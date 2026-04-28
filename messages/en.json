@@ -92,6 +92,7 @@
     "items": "Items",
     "description": "Description",
     "quantity": "Quantity",
+    "unit": "Unit",
     "unitPrice": "Unit Price",
     "vat": "VAT",
     "total": "Total",
