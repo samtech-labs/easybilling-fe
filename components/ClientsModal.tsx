@@ -8,6 +8,7 @@ import { Company } from '@/types/company';
 import { Client } from '@/types/client';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
 import CreateClientModal from './CreateClientModal';
+import BankAccountsModal from './BankAccountsModal';
 
 interface ClientsModalProps {
   isOpen: boolean;
@@ -20,10 +21,12 @@ export default function ClientsModal({ isOpen, onClose, company }: ClientsModalP
   const tClient = useTranslations('client');
   const tCompany = useTranslations('company');
   const tCommon = useTranslations('common');
+  const tBank = useTranslations('bankAccount');
   const { data: clients, isLoading, error } = useGetClients(company?.id || null);
   const deleteClientMutation = useDeleteClient(company?.id || '');
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isBankAccountsModalOpen, setIsBankAccountsModalOpen] = useState(false);
   const [clientToDelete, setClientToDelete] = useState<Client | null>(null);
 
   const handleViewInvoices = () => {
@@ -88,6 +91,15 @@ export default function ClientsModal({ isOpen, onClose, company }: ClientsModalP
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
               <span className="hidden sm:inline">{tClient('newClient')}</span>
+            </button>
+            <button
+              onClick={() => setIsBankAccountsModalOpen(true)}
+              className="inline-flex items-center justify-center px-3 sm:px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 flex-1 sm:flex-initial min-h-[44px]"
+            >
+              <svg className="w-5 h-5 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11m16-11v11M8 14v3m4-3v3m4-3v3" />
+              </svg>
+              <span className="hidden sm:inline">{tBank('bankAccounts')}</span>
             </button>
           </div>
         </div>
@@ -275,6 +287,13 @@ export default function ClientsModal({ isOpen, onClose, company }: ClientsModalP
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         companyId={company.id}
+      />
+
+      {/* Bank Accounts Modal */}
+      <BankAccountsModal
+        isOpen={isBankAccountsModalOpen}
+        onClose={() => setIsBankAccountsModalOpen(false)}
+        company={company}
       />
 
       {/* Delete Confirmation Modal */}
