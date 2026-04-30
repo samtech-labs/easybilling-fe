@@ -205,7 +205,12 @@
     "creditNoteCreatedSuccess": "Factură Storno creată cu succes!",
     "creditNoteCreatedError": "Eroare la crearea facturii storno. Vă rugăm încercați din nou.",
     "editLines": "Editați liniile facturii storno",
-    "creditNoteLines": "Linii Factură Storno"
+    "creditNoteLines": "Linii Factură Storno",
+    "issuingBankAccount": "Cont bancar",
+    "selectBankAccountOptional": "— Fără cont bancar —",
+    "noBankAccountsForCompany": "Nu există conturi bancare pentru această companie",
+    "addBankAccount": "Adaugă cont",
+    "bankAccountCurrencyMismatch": "Moneda contului bancar ({bankCurrency}) diferă de moneda facturii ({invoiceCurrency})"
   },
   "bankAccount": {
     "bankAccounts": "Conturi bancare",

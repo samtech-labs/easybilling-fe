@@ -124,7 +124,12 @@
     "notesPlaceholder": "Additional notes or payment instructions...",
     "createInvoiceButton": "Create Invoice",
     "creating": "Creating...",
-    "currency": "Currency"
+    "currency": "Currency",
+    "issuingBankAccount": "Bank Account",
+    "selectBankAccountOptional": "— No bank account —",
+    "noBankAccountsForCompany": "No bank accounts for this company",
+    "addBankAccount": "Add account",
+    "bankAccountCurrencyMismatch": "Bank account currency ({bankCurrency}) differs from invoice currency ({invoiceCurrency})"
   },
   "bankAccount": {
     "bankAccounts": "Bank Accounts",

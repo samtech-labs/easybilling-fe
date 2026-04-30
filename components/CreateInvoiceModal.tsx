@@ -7,6 +7,9 @@ import { useCreateInvoice, useGetLastInvoiceNumber } from '@/hooks/useInvoices';
 import { useGetCompanies } from '@/hooks/useCompanies';
 import { useGetClients } from '@/hooks/useClients';
 import { CreateInvoiceRequest, InvoiceLine, Invoice, Currency, getCurrencyLabel, UNIT_OPTIONS, DEFAULT_UNIT } from '@/types/invoice';
+import { useGetBankAccounts } from '@/hooks/useBankAccounts';
+import { formatIban } from '@/types/bankAccount';
+import BankAccountsModal from './BankAccountsModal';
 
 interface CreateInvoiceModalProps {
   isOpen: boolean;
@@ -48,13 +51,20 @@ export default function CreateInvoiceModal({
   const [invoiceLines, setInvoiceLines] = useState<InvoiceLine[]>([
     { description: '', quantity: 1, unitPrice: 0, totalPrice: 0, vat: 19, unit: DEFAULT_UNIT },
   ]);
+  const [bankAccountId, setBankAccountId] = useState<string>('');
+  const [isBankAccountsManageOpen, setIsBankAccountsManageOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
   const { data: companies } = useGetCompanies();
   const { data: clients } = useGetClients(selectedCompanyId || null);
+  const { data: bankAccounts } = useGetBankAccounts(selectedCompanyId || null);
   const { data: lastInvoiceNumber } = useGetLastInvoiceNumber(selectedCompanyId || null);
   const createInvoiceMutation = useCreateInvoice();
+  const selectedBankAccount = bankAccounts?.find((b) => b.id === bankAccountId) || null;
+  const currencyMismatch =
+    !!selectedBankAccount && selectedBankAccount.currency !== currency;
+  const selectedCompany = companies?.find((c) => c.id === selectedCompanyId) || null;
 
   const handleAddLine = () => {
     setInvoiceLines([
@@ -149,6 +159,7 @@ export default function CreateInvoiceModal({
       number,
       issueDate,
       dueDate,
+      bankAccountId: bankAccountId || null,
       invoiceLines: invoiceLines.map((line) => ({
         description: line.description,
         quantity: line.quantity,
@@ -213,6 +224,7 @@ export default function CreateInvoiceModal({
     setInvoiceLines([
       { description: '', quantity: 1, unitPrice: 0, totalPrice: 0, vat: 19, unit: DEFAULT_UNIT },
     ]);
+    setBankAccountId('');
     setErrorMessage('');
     setSuccessMessage('');
   };
@@ -221,6 +233,7 @@ export default function CreateInvoiceModal({
     if (!selectedCompanyId) {
       setSelectedClientId('');
     }
+    setBankAccountId('');
   }, [selectedCompanyId]);
 
   useEffect(() => {
@@ -531,6 +544,48 @@ export default function CreateInvoiceModal({
             </div>
           </div>
 
+          {/* Bank Account */}
+          <div>
+            <label htmlFor="bankAccount" className="block text-sm font-medium text-gray-700">
+              {tInvoice('issuingBankAccount')}
+            </label>
+            {selectedCompanyId && bankAccounts && bankAccounts.length === 0 ? (
+              <div className="mt-1 flex items-center justify-between gap-3 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm text-gray-600">
+                <span>{tInvoice('noBankAccountsForCompany')}</span>
+                <button
+                  type="button"
+                  onClick={() => setIsBankAccountsManageOpen(true)}
+                  className="inline-flex items-center px-3 py-1 text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md"
+                >
+                  {tInvoice('addBankAccount')}
+                </button>
+              </div>
+            ) : (
+              <select
+                id="bankAccount"
+                value={bankAccountId}
+                onChange={(e) => setBankAccountId(e.target.value)}
+                disabled={!selectedCompanyId}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm disabled:bg-gray-100 disabled:text-gray-500"
+              >
+                <option value="">{tInvoice('selectBankAccountOptional')}</option>
+                {bankAccounts?.map((b) => (
+                  <option key={b.id} value={b.id}>
+                    {b.bankName} — {formatIban(b.iban)} ({getCurrencyLabel(b.currency)})
+                  </option>
+                ))}
+              </select>
+            )}
+            {currencyMismatch && (
+              <div className="mt-2 px-3 py-2 text-sm bg-yellow-50 border border-yellow-200 text-yellow-800 rounded">
+                {tInvoice('bankAccountCurrencyMismatch', {
+                  bankCurrency: getCurrencyLabel(selectedBankAccount!.currency),
+                  invoiceCurrency: getCurrencyLabel(currency),
+                })}
+              </div>
+            )}
+          </div>
+
           {/* Invoice Lines */}
           <div className="bg-gray-50 p-4 rounded-lg">
             <div className="flex justify-between items-center mb-3">
@@ -760,6 +815,12 @@ export default function CreateInvoiceModal({
           </div>
         </form>
       </div>
+
+      <BankAccountsModal
+        isOpen={isBankAccountsManageOpen}
+        onClose={() => setIsBankAccountsManageOpen(false)}
+        company={selectedCompany}
+      />
     </div>
   );
 }

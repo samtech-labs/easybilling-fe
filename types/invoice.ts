@@ -58,6 +58,9 @@ export interface Invoice {
   currency?: Currency;
   originalInvoiceId?: string;
   originalInvoiceNumber?: string;
+  bankAccountId?: string | null;
+  bankAccountBankName?: string | null;
+  bankAccountIban?: string | null;
   company: {
     id: string;
     name: string;
@@ -101,6 +104,7 @@ export interface CreateInvoiceRequest {
   dueDate: string;
   invoiceLines: InvoiceLine[];
   notes?: string;
+  bankAccountId?: string | null;
 }
 
 export enum AnafSubmissionStatus {
@@ -124,4 +128,5 @@ export interface CreateCreditNoteRequest {
   series?: string;
   number?: string;
   lines?: InvoiceLine[];
+  bankAccountId?: string | null;
 }

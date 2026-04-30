@@ -3,7 +3,9 @@
 import { useState, FormEvent, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useCreateCreditNote } from '@/hooks/useInvoices';
-import { Invoice, InvoiceLine, CreateCreditNoteRequest, UNIT_OPTIONS, DEFAULT_UNIT } from '@/types/invoice';
+import { Invoice, InvoiceLine, CreateCreditNoteRequest, UNIT_OPTIONS, DEFAULT_UNIT, getCurrencyLabel, Currency } from '@/types/invoice';
+import { useGetBankAccounts } from '@/hooks/useBankAccounts';
+import { formatIban } from '@/types/bankAccount';
 
 interface CreateCreditNoteModalProps {
   isOpen: boolean;
@@ -24,10 +26,16 @@ export default function CreateCreditNoteModal({
   const [series, setSeries] = useState<string>('');
   const [number, setNumber] = useState<string>('');
   const [creditNoteLines, setCreditNoteLines] = useState<InvoiceLine[]>([]);
+  const [bankAccountId, setBankAccountId] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
   const createCreditNoteMutation = useCreateCreditNote();
+  const { data: bankAccounts } = useGetBankAccounts(originalInvoice?.company?.id || null);
+  const selectedBankAccount = bankAccounts?.find((b) => b.id === bankAccountId) || null;
+  const invoiceCurrency = originalInvoice?.currency ?? Currency.RON;
+  const currencyMismatch =
+    !!selectedBankAccount && selectedBankAccount.currency !== invoiceCurrency;
 
   // Initialize credit note lines from original invoice
   useEffect(() => {
@@ -61,6 +69,9 @@ export default function CreateCreditNoteModal({
       // Use same series as original invoice
       setSeries(originalInvoice.series);
       setNumber('');
+
+      // Pre-fill bank account from original invoice
+      setBankAccountId(originalInvoice.bankAccountId || '');
 
       // Reset messages
       setErrorMessage('');
@@ -149,6 +160,7 @@ export default function CreateCreditNoteModal({
       originalInvoiceId: originalInvoice.id,
       series: series || undefined,
       number: number || undefined,
+      bankAccountId: bankAccountId || null,
       lines: creditNoteLines.map((line) => ({
         description: line.description,
         quantity: line.quantity,
@@ -251,6 +263,40 @@ export default function CreateCreditNoteModal({
                 placeholder={tInvoice('number')}
               />
             </div>
+          </div>
+
+          {/* Bank Account */}
+          <div className="mb-6">
+            <label htmlFor="cn-bankAccount" className="block text-sm font-medium text-gray-700 mb-1">
+              {tInvoice('issuingBankAccount')}
+            </label>
+            {bankAccounts && bankAccounts.length === 0 ? (
+              <div className="px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm text-gray-600">
+                {tInvoice('noBankAccountsForCompany')}
+              </div>
+            ) : (
+              <select
+                id="cn-bankAccount"
+                value={bankAccountId}
+                onChange={(e) => setBankAccountId(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+              >
+                <option value="">{tInvoice('selectBankAccountOptional')}</option>
+                {bankAccounts?.map((b) => (
+                  <option key={b.id} value={b.id}>
+                    {b.bankName} — {formatIban(b.iban)} ({getCurrencyLabel(b.currency)})
+                  </option>
+                ))}
+              </select>
+            )}
+            {currencyMismatch && (
+              <div className="mt-2 px-3 py-2 text-sm bg-yellow-50 border border-yellow-200 text-yellow-800 rounded">
+                {tInvoice('bankAccountCurrencyMismatch', {
+                  bankCurrency: getCurrencyLabel(selectedBankAccount!.currency),
+                  invoiceCurrency: getCurrencyLabel(invoiceCurrency),
+                })}
+              </div>
+            )}
           </div>
 
           {/* Company and Client Info */}
