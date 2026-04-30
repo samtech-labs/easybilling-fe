@@ -1,6 +1,7 @@
 'use client';
 
 import { Invoice, AnafSubmissionStatus } from '@/types/invoice';
+import { formatIban } from '@/types/bankAccount';
 import { useGenerateInvoicePdf, useDownloadInvoiceXml, useSendEfactura, useGetAnafSubmissionStatus, useDownloadAnafResponse } from '@/hooks/useInvoices';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
@@ -283,6 +284,17 @@ export default function InvoiceDetailsModal({ isOpen, onClose, invoice }: Invoic
             </div>
           </div>
         </div>
+
+        {/* Bank Account */}
+        {invoice.bankAccountId && invoice.bankAccountIban && (
+          <div className="mb-6 bg-gray-50 rounded-lg p-4">
+            <h4 className="text-sm font-semibold text-gray-700 mb-1">{tInvoice('issuingBankAccount')}</h4>
+            <p className="text-sm text-gray-900">
+              {invoice.bankAccountBankName ? `${invoice.bankAccountBankName} — ` : ''}
+              <span className="font-mono">{formatIban(invoice.bankAccountIban)}</span>
+            </p>
+          </div>
+        )}
 
         {/* Invoice Lines */}
         <div className="mb-6">
